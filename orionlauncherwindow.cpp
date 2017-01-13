@@ -640,6 +640,9 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	else
 		command += " -savepassword:0";
 
+	if (ui->cb_LaunchSaveAero->isChecked())
+		command += " -aero";
+
 	command += " \"-login:" + serverItem->GetAddress() + "\"";
 
 	QString account = serverItem->GetAccount();
@@ -687,5 +690,8 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
 	}
+
+	if (ui->cb_LaunchCloseAfterLaunch->isChecked())
+		exit(0);
 }
 //----------------------------------------------------------------------------------

@@ -155,6 +155,32 @@
            <string>Fast login</string>
           </property>
          </widget>
+         <widget class="QCheckBox" name="cb_LaunchSaveAero">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>100</y>
+            <width>171</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Save aero (for assistant)</string>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="cb_LaunchCloseAfterLaunch">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>230</y>
+            <width>131</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Close after launch</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QWidget" name="tb_Editor">
          <attribute name="title">
