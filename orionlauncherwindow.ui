@@ -240,6 +240,9 @@
             <height>20</height>
            </rect>
           </property>
+          <property name="text">
+           <string>127.0.0.1,2593</string>
+          </property>
          </widget>
          <widget class="QLabel" name="label_5">
           <property name="geometry">
@@ -315,6 +318,9 @@
             <height>20</height>
            </rect>
           </property>
+          <property name="text">
+           <string/>
+          </property>
           <property name="maxLength">
            <number>30</number>
           </property>
@@ -340,6 +346,9 @@
             <width>241</width>
             <height>20</height>
            </rect>
+          </property>
+          <property name="text">
+           <string>ConfigName</string>
           </property>
          </widget>
          <widget class="QPushButton" name="pb_ServerSave">
@@ -378,6 +387,21 @@
            <string>Use proxy</string>
           </property>
          </widget>
+         <zorder>le_ServerName</zorder>
+         <zorder>le_ServerAddress</zorder>
+         <zorder>le_ServerAccount</zorder>
+         <zorder>le_ServerPassword</zorder>
+         <zorder>pb_ServerAdd</zorder>
+         <zorder>cb_ServerEncryptPassword</zorder>
+         <zorder>label_5</zorder>
+         <zorder>cb_ServerShowPassword</zorder>
+         <zorder>label_3</zorder>
+         <zorder>label_2</zorder>
+         <zorder>label_4</zorder>
+         <zorder>pb_ServerRemove</zorder>
+         <zorder>pb_ServerSave</zorder>
+         <zorder>cb_ServerProxy</zorder>
+         <zorder>cb_ServerUseProxy</zorder>
         </widget>
        </widget>
        <widget class="QLabel" name="label_13">
@@ -665,6 +689,43 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>pb_Launch</tabstop>
+  <tabstop>lw_ServerList</tabstop>
+  <tabstop>le_OrionPath</tabstop>
+  <tabstop>tb_SetOrionPath</tabstop>
+  <tabstop>le_CommandLine</tabstop>
+  <tabstop>cb_LaunchAutologin</tabstop>
+  <tabstop>cb_LaunchSavePassword</tabstop>
+  <tabstop>cb_LaunchSaveAero</tabstop>
+  <tabstop>cb_LaunchFastLogin</tabstop>
+  <tabstop>cb_LaunchCloseAfterLaunch</tabstop>
+  <tabstop>le_ServerName</tabstop>
+  <tabstop>le_ServerAddress</tabstop>
+  <tabstop>le_ServerAccount</tabstop>
+  <tabstop>le_ServerPassword</tabstop>
+  <tabstop>cb_ServerEncryptPassword</tabstop>
+  <tabstop>cb_ServerShowPassword</tabstop>
+  <tabstop>cb_ServerUseProxy</tabstop>
+  <tabstop>cb_ServerProxy</tabstop>
+  <tabstop>pb_ServerAdd</tabstop>
+  <tabstop>pb_ServerSave</tabstop>
+  <tabstop>pb_ServerRemove</tabstop>
+  <tabstop>lw_ProxyList</tabstop>
+  <tabstop>le_ProxyName</tabstop>
+  <tabstop>le_ProxyAddress</tabstop>
+  <tabstop>le_ProxyPort</tabstop>
+  <tabstop>gb_ProxySocks5</tabstop>
+  <tabstop>le_ProxyAccount</tabstop>
+  <tabstop>le_ProxyPassword</tabstop>
+  <tabstop>cb_ProxyEncryptPassword</tabstop>
+  <tabstop>cb_ProxyShowPassword</tabstop>
+  <tabstop>pb_ProxyAdd</tabstop>
+  <tabstop>pb_ProxySave</tabstop>
+  <tabstop>pb_ProxyRemove</tabstop>
+  <tabstop>tw_Main</tabstop>
+  <tabstop>tw_Server</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
