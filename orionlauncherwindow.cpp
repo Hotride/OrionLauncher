@@ -398,6 +398,7 @@ void OrionLauncherWindow::SaveServerList()
 		writter.writeAttribute("version", "0");
 		writter.writeAttribute("size", QString::number(count));
 		writter.writeAttribute("clientindex", QString::number(ui->cb_OrionPath->currentIndex()));
+		writter.writeAttribute("closeafterlaunch", BoolToText(ui->cb_LaunchCloseAfterLaunch->isChecked()));
 
 		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
 		{
@@ -544,6 +545,9 @@ void OrionLauncherWindow::LoadServerList()
 
 					if (attributes.hasAttribute("clientindex"))
 						clientindex = attributes.value("clientindex").toInt();
+
+					if (attributes.hasAttribute("closeafterlaunch"))
+						ui->cb_LaunchCloseAfterLaunch->setChecked(RawStringToBool(attributes.value("closeafterlaunch").toString()));
 
 					if (attributes.hasAttribute("path"))
 					{
