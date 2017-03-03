@@ -61,6 +61,14 @@ private slots:
 
 	void on_pb_Launch_clicked();
 
+	void on_cb_LaunchAutologin_clicked();
+
+	void on_cb_LaunchSavePassword_clicked();
+
+	void on_cb_LaunchSaveAero_clicked();
+
+	void on_cb_LaunchFastLogin_clicked();
+
 private:
 	Ui::OrionLauncherWindow *ui;
 

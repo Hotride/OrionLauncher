@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Orion launcher</string>
+   <string>Orion launcher 1.0.0</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -417,16 +417,6 @@
          <string>Orion path:</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="le_OrionPath">
-        <property name="geometry">
-         <rect>
-          <x>80</x>
-          <y>8</y>
-          <width>491</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
        <widget class="QToolButton" name="tb_SetOrionPath">
         <property name="geometry">
          <rect>
@@ -438,6 +428,19 @@
         </property>
         <property name="text">
          <string>...</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="cb_OrionPath">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>8</y>
+          <width>491</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
@@ -692,7 +695,6 @@
  <tabstops>
   <tabstop>pb_Launch</tabstop>
   <tabstop>lw_ServerList</tabstop>
-  <tabstop>le_OrionPath</tabstop>
   <tabstop>tb_SetOrionPath</tabstop>
   <tabstop>le_CommandLine</tabstop>
   <tabstop>cb_LaunchAutologin</tabstop>

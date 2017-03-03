@@ -15,13 +15,18 @@
 class CServerListItem : public QListWidgetItem
 {
 private:
-	QString m_Address{""};
-	QString m_Account{""};
-	QString m_Password{""};
-	QString m_Command{""};
-	bool m_Encrypted{false};
-	bool m_UseProxy{false};
-	QString m_Proxy{""};
+	QString m_Address{ "" };
+	QString m_Account{ "" };
+	QString m_Password{ "" };
+	QString m_Command{ "" };
+	bool m_Encrypted{ false };
+	bool m_UseProxy{ false };
+	QString m_Proxy{ "" };
+
+	bool m_OptionAutologin{ false };
+	bool m_OptionSavePassword{ false };
+	bool m_OptionSaveAero{ false };
+	bool m_OptionFastLogin{ false};
 
 public:
 	CServerListItem(const QString &name);
@@ -48,6 +53,18 @@ public:
 
 	QString GetProxy() const { return m_Proxy; }
 	void SetProxy(const QString &proxy) { m_Proxy = proxy; }
+
+	bool GetOptionAutologin() const { return m_OptionAutologin; }
+	void SetOptionAutologin(const bool &autologin) { m_OptionAutologin = autologin; }
+
+	bool GetOptionSavePassword() const { return m_OptionSavePassword; }
+	void SetOptionSavePassword(const bool &savePassword) { m_OptionSavePassword = savePassword; }
+
+	bool GetOptionSaveAero() const { return m_OptionSaveAero; }
+	void SetOptionSaveAero(const bool &saveAero) { m_OptionSaveAero = saveAero; }
+
+	bool GetOptionFastLogin() const { return m_OptionFastLogin; }
+	void SetOptionFastLogin(const bool &fastLogin) { m_OptionFastLogin = fastLogin; }
 };
 //----------------------------------------------------------------------------------
 #endif // SERVERLISTITEM_H

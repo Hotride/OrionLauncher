@@ -84,6 +84,11 @@ void OrionLauncherWindow::on_lw_ServerList_clicked(const QModelIndex &index)
 		ui->cb_ServerEncryptPassword->setChecked(item->GetEncrypted());
 		ui->le_CommandLine->setText(item->GetCommand());
 
+		ui->cb_LaunchAutologin->setChecked(item->GetOptionAutologin());
+		ui->cb_LaunchSavePassword->setChecked(item->GetOptionSavePassword());
+		ui->cb_LaunchSaveAero->setChecked(item->GetOptionSaveAero());
+		ui->cb_LaunchFastLogin->setChecked(item->GetOptionFastLogin());
+
 		ui->cb_ServerUseProxy->setChecked(item->GetUseProxy());
 		ui->cb_ServerProxy->setCurrentText(item->GetProxy());
 	}
@@ -392,7 +397,16 @@ void OrionLauncherWindow::SaveServerList()
 		writter.writeStartElement("serverlist");
 		writter.writeAttribute("version", "0");
 		writter.writeAttribute("size", QString::number(count));
-		writter.writeAttribute("path", ui->le_OrionPath->text());
+		writter.writeAttribute("clientindex", QString::number(ui->cb_OrionPath->currentIndex()));
+
+		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
+		{
+			writter.writeStartElement("clientpath");
+
+			writter.writeAttribute("path", ui->cb_OrionPath->itemText(i));
+
+			writter.writeEndElement(); //clientpath
+		}
 
 		for (int i = 0; i < count; i++)
 		{
@@ -411,6 +425,11 @@ void OrionLauncherWindow::SaveServerList()
 				writter.writeAttribute("encrypted", BoolToText(item->GetEncrypted()));
 				writter.writeAttribute("useproxy", BoolToText(item->GetUseProxy()));
 				writter.writeAttribute("proxyname", item->GetProxy());
+
+				writter.writeAttribute("optionautologin", BoolToText(item->GetOptionAutologin()));
+				writter.writeAttribute("optionsavepassword", BoolToText(item->GetOptionSavePassword()));
+				writter.writeAttribute("optionsaveaero", BoolToText(item->GetOptionSaveAero()));
+				writter.writeAttribute("optionfastlogin", BoolToText(item->GetOptionFastLogin()));
 
 				writter.writeEndElement(); //server
 			}
@@ -502,6 +521,9 @@ void OrionLauncherWindow::LoadServerList()
 
 		int version = 0;
 		int count = 0;
+		int clientindex = -1;
+
+		ui->cb_OrionPath->clear();
 
 		Q_UNUSED(version);
 		Q_UNUSED(count);
@@ -520,8 +542,19 @@ void OrionLauncherWindow::LoadServerList()
 					if (attributes.hasAttribute("size"))
 						count = attributes.value("size").toInt();
 
+					if (attributes.hasAttribute("clientindex"))
+						clientindex = attributes.value("clientindex").toInt();
+
 					if (attributes.hasAttribute("path"))
-						ui->le_OrionPath->setText(attributes.value("path").toString());
+					{
+						ui->cb_OrionPath->addItem(attributes.value("path").toString());
+						clientindex = 0;
+					}
+				}
+				else if (reader.name() == "clientpath")
+				{
+					if (attributes.hasAttribute("path"))
+						ui->cb_OrionPath->addItem(attributes.value("path").toString());
 				}
 				else if (reader.name() == "server")
 				{
@@ -550,6 +583,18 @@ void OrionLauncherWindow::LoadServerList()
 						if (attributes.hasAttribute("proxyname"))
 							item->SetProxy(attributes.value("proxyname").toString());
 
+						if (attributes.hasAttribute("optionautologin"))
+							item->SetOptionAutologin(RawStringToBool(attributes.value("optionautologin").toString()));
+
+						if (attributes.hasAttribute("optionsavepassword"))
+							item->SetOptionSavePassword(RawStringToBool(attributes.value("optionsavepassword").toString()));
+
+						if (attributes.hasAttribute("optionsaveaero"))
+							item->SetOptionSaveAero(RawStringToBool(attributes.value("optionsaveaero").toString()));
+
+						if (attributes.hasAttribute("optionfastlogin"))
+							item->SetOptionFastLogin(RawStringToBool(attributes.value("optionfastlogin").toString()));
+
 						ui->lw_ServerList->addItem(item);
 					}
 				}
@@ -558,13 +603,16 @@ void OrionLauncherWindow::LoadServerList()
 			reader.readNext();
 		}
 
+		if (clientindex >= 0 && clientindex < ui->cb_OrionPath->count())
+			ui->cb_OrionPath->setCurrentIndex(clientindex);
+
 		file.close();
 	}
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_tb_SetOrionPath_clicked()
 {
-	QString startPath = ui->le_OrionPath->text();
+	QString startPath = ui->cb_OrionPath->currentText();
 
 	if (!startPath.length())
 		startPath = QDir::currentPath();
@@ -572,7 +620,10 @@ void OrionLauncherWindow::on_tb_SetOrionPath_clicked()
 	QString path = QFileDialog::getOpenFileName(nullptr, tr("Select OrionUO"), startPath, tr("Executable(*.exe)"));
 
 	if (path.length())
-		ui->le_OrionPath->setText(path);
+	{
+		ui->cb_OrionPath->addItem(path);
+		ui->cb_OrionPath->setCurrentIndex(ui->cb_OrionPath->count() - 1);
+	}
 }
 //----------------------------------------------------------------------------------
 QString OrionLauncherWindow::DecodeArgumentString(const char *text, const int &length)
@@ -614,7 +665,7 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		return;
 	}
 
-	QString directoryPath = ui->le_OrionPath->text();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 	int pos = directoryPath.lastIndexOf('/');
 
 	if (pos == -1)
@@ -623,7 +674,7 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	if (pos != -1)
 		directoryPath.resize(pos);
 
-	QString program = ui->le_OrionPath->text();
+	QString program = ui->cb_OrionPath->currentText();
 
 	QString command = ui->le_CommandLine->text();
 
@@ -693,5 +744,37 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 
 	if (ui->cb_LaunchCloseAfterLaunch->isChecked())
 		exit(0);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_LaunchAutologin_clicked()
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (item != nullptr)
+		item->SetOptionAutologin(ui->cb_LaunchAutologin->isChecked());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_LaunchSavePassword_clicked()
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (item != nullptr)
+		item->SetOptionSavePassword(ui->cb_LaunchSavePassword->isChecked());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_LaunchSaveAero_clicked()
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (item != nullptr)
+		item->SetOptionSaveAero(ui->cb_LaunchSaveAero->isChecked());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_LaunchFastLogin_clicked()
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (item != nullptr)
+		item->SetOptionFastLogin(ui->cb_LaunchFastLogin->isChecked());
 }
 //----------------------------------------------------------------------------------
