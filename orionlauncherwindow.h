@@ -72,6 +72,8 @@ private slots:
 private:
 	Ui::OrionLauncherWindow *ui;
 
+	void UpdateServerFields(const int &index);
+
 	QString BoolToText(const bool &value);
 
 	bool RawStringToBool(QString value);

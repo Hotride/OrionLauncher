@@ -73,7 +73,12 @@ void OrionLauncherWindow::keyPressEvent(QKeyEvent *event)
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_lw_ServerList_clicked(const QModelIndex &index)
 {
-	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->item(index.row());
+	UpdateServerFields(index.row());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::UpdateServerFields(const int &index)
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->item(index);
 
 	if (item != nullptr)
 	{
@@ -399,6 +404,7 @@ void OrionLauncherWindow::SaveServerList()
 		writter.writeAttribute("size", QString::number(count));
 		writter.writeAttribute("clientindex", QString::number(ui->cb_OrionPath->currentIndex()));
 		writter.writeAttribute("closeafterlaunch", BoolToText(ui->cb_LaunchCloseAfterLaunch->isChecked()));
+		writter.writeAttribute("lastserver", QString::number(ui->lw_ServerList->currentRow()));
 
 		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
 		{
@@ -523,6 +529,7 @@ void OrionLauncherWindow::LoadServerList()
 		int version = 0;
 		int count = 0;
 		int clientindex = -1;
+		int lastServer = -1;
 
 		ui->cb_OrionPath->clear();
 
@@ -548,6 +555,9 @@ void OrionLauncherWindow::LoadServerList()
 
 					if (attributes.hasAttribute("closeafterlaunch"))
 						ui->cb_LaunchCloseAfterLaunch->setChecked(RawStringToBool(attributes.value("closeafterlaunch").toString()));
+
+					if (attributes.hasAttribute("lastserver"))
+						lastServer = attributes.value("lastserver").toInt();
 
 					if (attributes.hasAttribute("path"))
 					{
@@ -609,6 +619,12 @@ void OrionLauncherWindow::LoadServerList()
 
 		if (clientindex >= 0 && clientindex < ui->cb_OrionPath->count())
 			ui->cb_OrionPath->setCurrentIndex(clientindex);
+
+		if (lastServer >= 0 && lastServer < ui->lw_ServerList->count())
+		{
+			ui->lw_ServerList->setCurrentRow(lastServer);
+			UpdateServerFields(lastServer);
+		}
 
 		file.close();
 	}
