@@ -747,7 +747,12 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	}
 
 	if (ui->cb_LaunchCloseAfterLaunch->isChecked())
+	{
+		SaveServerList();
+		SaveProxyList();
+
 		exit(0);
+	}
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_cb_LaunchAutologin_clicked()
