@@ -437,6 +437,7 @@ void OrionLauncherWindow::SaveServerList()
 				writter.writeAttribute("optionsavepassword", BoolToText(item->GetOptionSavePassword()));
 				writter.writeAttribute("optionsaveaero", BoolToText(item->GetOptionSaveAero()));
 				writter.writeAttribute("optionfastlogin", BoolToText(item->GetOptionFastLogin()));
+				writter.writeAttribute("optionrunuoam", BoolToText(item->GetOptionRunUOAM()));
 
 				writter.writeEndElement(); //server
 			}
@@ -609,6 +610,9 @@ void OrionLauncherWindow::LoadServerList()
 						if (attributes.hasAttribute("optionfastlogin"))
 							item->SetOptionFastLogin(RawStringToBool(attributes.value("optionfastlogin").toString()));
 
+						if (attributes.hasAttribute("optionrunuoam"))
+							item->SetOptionRunUOAM(RawStringToBool(attributes.value("optionrunuoam").toString()));
+
 						ui->lw_ServerList->addItem(item);
 					}
 				}
@@ -748,18 +752,30 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	if (command.length())
 		program += " " + command;
 
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	memset(&si, 0, sizeof(si));
-	si.cb = sizeof(si);
-
-	memset(&pi, 0, sizeof(pi));
-
-	if (CreateProcess(NULL, (LPWSTR)program.toStdWString().c_str(), NULL, NULL, FALSE, 0, NULL, (LPWSTR)directoryPath.toStdWString().c_str(), &si, &pi))
+	auto runProgram = [](const QString &exePath, const QString &directory)
 	{
-		CloseHandle(pi.hThread);
-		CloseHandle(pi.hProcess);
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+
+		memset(&si, 0, sizeof(si));
+		si.cb = sizeof(si);
+
+		memset(&pi, 0, sizeof(pi));
+
+		if (CreateProcess(NULL, (LPWSTR)exePath.toStdWString().c_str(), NULL, NULL, FALSE, 0, NULL, (LPWSTR)directory.toStdWString().c_str(), &si, &pi))
+		{
+			CloseHandle(pi.hThread);
+			CloseHandle(pi.hProcess);
+		}
+
+	};
+
+	runProgram(program, directoryPath);
+
+	if (ui->cb_LaunchRunUOAM->isChecked())
+	{
+		directoryPath += "/Map";
+		runProgram(directoryPath + "/EnhancedMap.exe", directoryPath);
 	}
 
 	if (ui->cb_LaunchCloseAfterLaunch->isChecked())
@@ -801,5 +817,13 @@ void OrionLauncherWindow::on_cb_LaunchFastLogin_clicked()
 
 	if (item != nullptr)
 		item->SetOptionFastLogin(ui->cb_LaunchFastLogin->isChecked());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_LaunchRunUOAM_clicked()
+{
+	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (item != nullptr)
+		item->SetOptionRunUOAM(ui->cb_LaunchFastLogin->isChecked());
 }
 //----------------------------------------------------------------------------------

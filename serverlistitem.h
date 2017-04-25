@@ -26,7 +26,8 @@ private:
 	bool m_OptionAutologin{ false };
 	bool m_OptionSavePassword{ false };
 	bool m_OptionSaveAero{ false };
-	bool m_OptionFastLogin{ false};
+	bool m_OptionFastLogin{ false };
+	bool m_OptionRunUOAM{ false };
 
 public:
 	CServerListItem(const QString &name);
@@ -65,6 +66,9 @@ public:
 
 	bool GetOptionFastLogin() const { return m_OptionFastLogin; }
 	void SetOptionFastLogin(const bool &fastLogin) { m_OptionFastLogin = fastLogin; }
+
+	bool GetOptionRunUOAM() const { return m_OptionRunUOAM; }
+	void SetOptionRunUOAM(const bool &runUOAM) { m_OptionRunUOAM = runUOAM; }
 };
 //----------------------------------------------------------------------------------
 #endif // SERVERLISTITEM_H

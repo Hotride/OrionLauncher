@@ -69,6 +69,8 @@ private slots:
 
 	void on_cb_LaunchFastLogin_clicked();
 
+	void on_cb_LaunchRunUOAM_clicked();
+
 private:
 	Ui::OrionLauncherWindow *ui;
 

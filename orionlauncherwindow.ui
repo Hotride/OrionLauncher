@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Orion launcher 1.0.0</string>
+   <string>Orion launcher 1.0.0.1</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -179,6 +179,19 @@
           </property>
           <property name="text">
            <string>Close after launch</string>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="cb_LaunchRunUOAM">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>120</y>
+            <width>271</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Run UOAM (UODir/Map/EnhancedMap.exe)</string>
           </property>
          </widget>
         </widget>
