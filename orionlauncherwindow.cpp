@@ -93,6 +93,7 @@ void OrionLauncherWindow::UpdateServerFields(const int &index)
 		ui->cb_LaunchSavePassword->setChecked(item->GetOptionSavePassword());
 		ui->cb_LaunchSaveAero->setChecked(item->GetOptionSaveAero());
 		ui->cb_LaunchFastLogin->setChecked(item->GetOptionFastLogin());
+		ui->cb_LaunchRunUOAM->setChecked(item->GetOptionRunUOAM());
 
 		ui->cb_ServerUseProxy->setChecked(item->GetUseProxy());
 		ui->cb_ServerProxy->setCurrentText(item->GetProxy());
@@ -824,6 +825,6 @@ void OrionLauncherWindow::on_cb_LaunchRunUOAM_clicked()
 	CServerListItem *item = (CServerListItem*)ui->lw_ServerList->currentItem();
 
 	if (item != nullptr)
-		item->SetOptionRunUOAM(ui->cb_LaunchFastLogin->isChecked());
+		item->SetOptionRunUOAM(ui->cb_LaunchRunUOAM->isChecked());
 }
 //----------------------------------------------------------------------------------
