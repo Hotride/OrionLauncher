@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Orion launcher 1.0.0.1</string>
+   <string>Orion launcher</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -696,6 +696,464 @@
         </property>
         <property name="text">
          <string>Save selected</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tb_OAFeatures">
+       <attribute name="title">
+        <string>OA Features</string>
+       </attribute>
+       <widget class="QLabel" name="label_14">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>10</y>
+          <width>101</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enabled options:</string>
+        </property>
+       </widget>
+       <widget class="QListWidget" name="lw_OAFeaturesOptions">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>161</width>
+          <height>301</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>Corpses autoopen</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Stealth steps counter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sound filter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Light filter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Weather filter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Season filter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>No death screen</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Auto open doors</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tracker</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Reserved</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Reserved</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fast rotation</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Recurse search</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Autostart</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Ignore staminacheck</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Party agent</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Shop agent</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tray icon</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="label_15">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>10</y>
+          <width>131</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enabled script groups:</string>
+        </property>
+       </widget>
+       <widget class="QListWidget" name="lw_OAFeaturesScripts">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>30</y>
+          <width>141</width>
+          <height>301</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>Information</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Text window</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Containers search</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Ground search</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Moving</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Resend</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Journal</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rename mounts</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Buy</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sell</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hide</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Move items</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Morph</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Emote actions</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fint/Ignore types</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Find arrays</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Client options</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Corpse search</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Extended menu</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Buffs</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Trading</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Enemy list</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Friend list</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Font color</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+       </widget>
+       <widget class="QGroupBox" name="gb_OAFeaturesEmulator">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>30</y>
+          <width>271</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Output code for emulator</string>
+        </property>
+        <widget class="QRadioButton" name="rb_OAFeaturesSphere">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>71</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Sphere</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rb_OAFeaturesRunUO">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>30</y>
+           <width>71</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>RunUO</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rb_OAFeaturesPOL">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>30</y>
+           <width>51</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>POL</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QPlainTextEdit" name="pte_OAFeaturesCode">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>100</y>
+          <width>271</width>
+          <height>231</height>
+         </rect>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QPlainTextEdit::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>

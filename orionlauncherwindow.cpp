@@ -36,6 +36,10 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
 
 	ui->tw_Main->setCurrentIndex(0);
 	ui->tw_Server->setCurrentIndex(0);
+
+	UpdateOAFecturesCode();
+
+	setWindowTitle("Orion launcher " + QString(APP_VERSION));
 }
 //----------------------------------------------------------------------------------
 OrionLauncherWindow::~OrionLauncherWindow()
@@ -826,5 +830,95 @@ void OrionLauncherWindow::on_cb_LaunchRunUOAM_clicked()
 
 	if (item != nullptr)
 		item->SetOptionRunUOAM(ui->cb_LaunchRunUOAM->isChecked());
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_lw_OAFeaturesOptions_clicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+
+	UpdateOAFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_lw_OAFeaturesScripts_clicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+
+	UpdateOAFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OAFeaturesSphere_clicked()
+{
+	UpdateOAFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OAFeaturesRunUO_clicked()
+{
+	UpdateOAFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OAFeaturesPOL_clicked()
+{
+	UpdateOAFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::UpdateOAFecturesCode()
+{
+	quint64 featuresFlags = 0;
+	quint64 scriptGroupsFlags = 0;
+
+	for (int i = 0; i < ui->lw_OAFeaturesOptions->count(); i++)
+	{
+		QListWidgetItem *item = ui->lw_OAFeaturesOptions->item(i);
+
+		if (item != nullptr && item->checkState() == Qt::Checked)
+			featuresFlags |= 1 << i;
+	}
+
+	for (int i = 0; i < ui->lw_OAFeaturesScripts->count(); i++)
+	{
+		QListWidgetItem *item = ui->lw_OAFeaturesScripts->item(i);
+
+		if (item != nullptr && item->checkState() == Qt::Checked)
+			scriptGroupsFlags |= 1 << i;
+	}
+
+	QString code = "";
+
+	if (ui->rb_OAFeaturesSphere->isChecked())
+	{
+		code.sprintf("//data for sendpacket\nB0FC W015 W0A001 D0%08X D0%08X D0%08X D0%08X",
+					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+	}
+	else if (ui->rb_OAFeaturesRunUO->isChecked())
+	{
+		code.sprintf("public sealed class OAFeatures : Packet\n"
+					"{\n"
+						"public OAFeatures() : base(0xFC)\n"
+						"{\n"
+							"EnsureCapacity(21);\n"
+							"m_Stream.Write((ushort)0xA001);\n"
+							"m_Stream.Write((uint)0x%08X);\n"
+							"m_Stream.Write((uint)0x%08X);\n"
+							"m_Stream.Write((uint)0x%08X);\n"
+							"m_Stream.Write((uint)0x%08X);\n"
+						"}\n"
+					"}",
+					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+	}
+	else if (ui->rb_OAFeaturesPOL->isChecked())
+	{
+		code.sprintf("program oafeatures_sendpacket(who)\n"
+					 "var res := SendPacket(who, \"FC15A001%08X%08X%08X%08X\");\n"
+					 "if (!res)\n"
+						 "print(\"SendPacket error: \" + res.errortext );\n"
+					 "endif\n"
+					"endprogram",
+					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+	}
+
+	ui->pte_OAFeaturesCode->setPlainText(code);
 }
 //----------------------------------------------------------------------------------

@@ -71,6 +71,16 @@ private slots:
 
 	void on_cb_LaunchRunUOAM_clicked();
 
+	void on_lw_OAFeaturesOptions_clicked(const QModelIndex &index);
+
+	void on_lw_OAFeaturesScripts_clicked(const QModelIndex &index);
+
+	void on_rb_OAFeaturesSphere_clicked();
+
+	void on_rb_OAFeaturesRunUO_clicked();
+
+	void on_rb_OAFeaturesPOL_clicked();
+
 private:
 	Ui::OrionLauncherWindow *ui;
 
@@ -90,6 +100,8 @@ private:
 
 	QString DecodeArgumentString(const char *text, const int &length);
 	QString EncodeArgumentString(const char *text, const int &length);
+
+	void UpdateOAFecturesCode();
 };
 //----------------------------------------------------------------------------------
 extern OrionLauncherWindow *g_OrionLauncherWindow;
