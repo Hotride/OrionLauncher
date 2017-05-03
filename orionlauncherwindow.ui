@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -454,6 +454,22 @@
         </property>
         <property name="editable">
          <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cb_CheckUpdates">
+        <property name="geometry">
+         <rect>
+          <x>490</x>
+          <y>40</y>
+          <width>111</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Check updates</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>

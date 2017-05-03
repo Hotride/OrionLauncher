@@ -183,13 +183,15 @@ private:
 	QString DecodeArgumentString(const char *text, const int &length);
 	QString EncodeArgumentString(const char *text, const int &length);
 
+	void RunProgram(const QString &exePath, const QString &directory);
+
 	void UpdateOAFecturesCode();
 
 	void ParseHTML(const QString &html);
 
 	QByteArray DownloadPage(const char *host, const QString &path);
 
-	void UnpackArchive(const QByteArray &fileData, const QString &directoryPath, const QString &filePath);
+	void UnpackArchive(const QByteArray &fileData, const QString &directoryPath, const QString &filePath, const bool &removeArchive);
 
 	bool WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash);
 

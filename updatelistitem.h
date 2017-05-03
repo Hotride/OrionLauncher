@@ -25,7 +25,6 @@ public:
 	QString Hash{ "" };
 	QString ZipFileName{ "" };
 	QString Notes{ "" };
-	bool Critical{ false };
 };
 //----------------------------------------------------------------------------------
 #endif // UPDATELISTITEM_H
