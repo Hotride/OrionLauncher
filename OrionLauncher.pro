@@ -9,7 +9,7 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT       += core gui
 
-LIBS = libshell32
+LIBS = libshell32 libwininet libversion
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,10 +19,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         orionlauncherwindow.cpp \
     serverlistitem.cpp \
-    proxylistitem.cpp
+    proxylistitem.cpp \
+    updatelistitem.cpp
 
 HEADERS  += orionlauncherwindow.h \
     serverlistitem.h \
-    proxylistitem.h
+    proxylistitem.h \
+    qzipreader_p.h \
+    updatelistitem.h
 
 FORMS    += orionlauncherwindow.ui

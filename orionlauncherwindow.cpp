@@ -18,6 +18,10 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <windows.h>
+#include <Wininet.h>
+#include "qzipreader_p.h"
+#include "updatelistitem.h"
+#include <QDebug>
 
 OrionLauncherWindow *g_OrionLauncherWindow = nullptr;
 //----------------------------------------------------------------------------------
@@ -40,6 +44,10 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
 	UpdateOAFecturesCode();
 
 	setWindowTitle("Orion launcher " + QString(APP_VERSION));
+
+	m_Loading = false;
+
+	on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
 OrionLauncherWindow::~OrionLauncherWindow()
@@ -574,7 +582,22 @@ void OrionLauncherWindow::LoadServerList()
 				else if (reader.name() == "clientpath")
 				{
 					if (attributes.hasAttribute("path"))
-						ui->cb_OrionPath->addItem(attributes.value("path").toString());
+					{
+						QString path = attributes.value("path").toString();
+						bool found = false;
+
+						for (int i = 0; i < ui->cb_OrionPath->count(); i++)
+						{
+							if (path == ui->cb_OrionPath->itemText(i))
+							{
+								found = true;
+								break;
+							}
+						}
+
+						if (!found)
+							ui->cb_OrionPath->addItem(path);
+					}
 				}
 				else if (reader.name() == "server")
 				{
@@ -650,6 +673,15 @@ void OrionLauncherWindow::on_tb_SetOrionPath_clicked()
 
 	if (path.length())
 	{
+		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
+		{
+			if (path == ui->cb_OrionPath->itemText(i))
+			{
+				ui->cb_OrionPath->setCurrentIndex(i);
+				return;
+			}
+		}
+
 		ui->cb_OrionPath->addItem(path);
 		ui->cb_OrionPath->setCurrentIndex(ui->cb_OrionPath->count() - 1);
 	}
@@ -694,14 +726,7 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		return;
 	}
 
-	QString directoryPath = ui->cb_OrionPath->currentText();
-	int pos = directoryPath.lastIndexOf('/');
-
-	if (pos == -1)
-		pos = directoryPath.lastIndexOf('\\');
-
-	if (pos != -1)
-		directoryPath.resize(pos);
+	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
 
 	QString program = ui->cb_OrionPath->currentText();
 
@@ -920,5 +945,327 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 	}
 
 	ui->pte_OAFeaturesCode->setPlainText(code);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
+{
+	Q_UNUSED(index);
+
+	if (!m_Loading)
+		on_pb_CheckUpdates_clicked();
+}
+//----------------------------------------------------------------------------------
+uint OrionLauncherWindow::GetCrc(const QString &fileName)
+{
+	uint crc = 0xFFFFFFFF;
+
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		QByteArray fileData = file.readAll();
+		file.close();
+
+		for (const uchar &c : fileData)
+			crc = (crc >> 8) ^ m_CRC_Table[(crc & 0xFF) ^ c];
+	}
+
+	return (crc ^ 0xFFFFFFFF);
+}
+//----------------------------------------------------------------------------------
+bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash)
+{
+	if (name.toLower() == "OrionLauncher.exe")
+		directoryPath = qApp->applicationDirPath();
+
+	QString filePath = directoryPath + "/" + name;
+
+	if (!QFile::exists(filePath))
+		return true;
+
+	DWORD dummy = 0;
+	DWORD dwSize = GetFileVersionInfoSize(filePath.toStdWString().c_str(), &dummy);
+
+	QString fileVersion;
+
+	if (version.length() && dwSize > 0)
+	{
+		QByteArray lpVersionInfo(dwSize, 0);
+
+		if (GetFileVersionInfo(filePath.toStdWString().c_str(), 0, dwSize, lpVersionInfo.data()))
+		{
+			UINT uLen = 0;
+			VS_FIXEDFILEINFO *lpFfi = NULL;
+
+			VerQueryValue(lpVersionInfo.data(), L"\\", (LPVOID *)&lpFfi, &uLen);
+
+			DWORD dwFileVersionMS = 0;
+			DWORD dwFileVersionLS = 0;
+
+			if (lpFfi != NULL)
+			{
+				dwFileVersionMS = lpFfi->dwFileVersionMS;
+				dwFileVersionLS = lpFfi->dwFileVersionLS;
+			}
+
+			int dwLeftMost = (int)HIWORD(dwFileVersionMS);
+			int dwSecondLeft = (int)LOWORD(dwFileVersionMS);
+			int dwSecondRight = (int)HIWORD(dwFileVersionLS);
+			int dwRightMost = (int)LOWORD(dwFileVersionLS);
+
+			fileVersion.sprintf("%i.%i.%i.%i", dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
+
+			return (fileVersion != version);
+		}
+	}
+
+	QString fileHash;
+
+	fileHash.sprintf("%08X", GetCrc(filePath));
+
+	return (fileHash != hash);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::ParseHTML(const QString &html)
+{
+	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
+
+	QXmlStreamReader reader(html);
+
+	//qDebug() << "ParseHTML:\n" << html;
+
+	while (!reader.atEnd() && !reader.hasError())
+	{
+		if (reader.isStartElement())
+		{
+			QXmlStreamAttributes attributes = reader.attributes();
+
+			if (reader.name().toString().trimmed().toLower() == "meta")
+			{
+				CUpdateListItem *updateInfo = new CUpdateListItem();
+
+				if (attributes.hasAttribute("name"))
+				{
+					updateInfo->Name = attributes.value("name").toString();
+					updateInfo->setText(updateInfo->Name);
+				}
+
+				if (attributes.hasAttribute("version"))
+					updateInfo->Version = attributes.value("version").toString();
+
+				if (attributes.hasAttribute("hash"))
+					updateInfo->Hash = attributes.value("hash").toString();
+
+				if (attributes.hasAttribute("filename"))
+					updateInfo->ZipFileName = attributes.value("filename").toString();
+
+				if (attributes.hasAttribute("updatenotes"))
+					updateInfo->Notes = attributes.value("updatenotes").toString();
+
+				if (attributes.hasAttribute("critical"))
+					updateInfo->Critical = (attributes.value("critical").toString().trimmed().toLower() == "yes");
+
+				if (updateInfo->ZipFileName.length() && WantUpdateFile(directoryPath, updateInfo->Name, updateInfo->Version.trimmed(), updateInfo->Hash.trimmed().toUpper()))
+				{
+					updateInfo->setCheckState(Qt::Checked);
+
+					if (updateInfo->Critical)
+						updateInfo->setFlags(0);
+
+					ui->lw_AvailableUpdates->addItem(updateInfo);
+				}
+				else
+					delete updateInfo;
+			}
+		}
+
+		reader.readNext();
+	}
+}
+//----------------------------------------------------------------------------------
+QByteArray OrionLauncherWindow::DownloadPage(const char *host, const QString &path)
+{
+	QByteArray result;
+
+	HINTERNET session = InternetOpen(NULL, INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
+
+	if (session)
+	{
+		HINTERNET connect = InternetConnectA(session, host, INTERNET_DEFAULT_HTTP_PORT, 0, 0, INTERNET_SERVICE_HTTP, 0, 1);
+
+		if (connect)
+		{
+			HINTERNET request = HttpOpenRequestW(connect, L"GET", path.toStdWString().c_str(), HTTP_VERSION, 0, 0, INTERNET_FLAG_KEEP_CONNECTION, 1);
+
+			if (request)
+			{
+				if (HttpSendRequest(request, 0, 0, 0, 0))
+				{
+					DWORD size = 0;
+					InternetQueryDataAvailable(request, &size, 0, 0);
+
+					while (size)
+					{
+						QByteArray temp(size, 0);
+						DWORD nbr = 0;
+
+						if (!InternetReadFile(request, temp.data(), size, &nbr))
+							break;
+
+						result.append(temp);
+
+						InternetQueryDataAvailable(request, &size, 0, 0);
+					}
+				}
+				else
+					qDebug() << "HttpSendRequest error";
+
+				InternetCloseHandle(request);
+			}
+			else
+				qDebug() << "Request error";
+
+			InternetCloseHandle(connect);
+		}
+		else
+			qDebug() << "Connection error";
+
+		InternetCloseHandle(session);
+	}
+	else
+		qDebug() << "Session error";
+
+	return result;
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
+{
+	ui->lw_AvailableUpdates->clear();
+
+	ParseHTML(DownloadPage("www.orion-client.online", "/Downloads/OrionUpdate.html"));
+
+	if (ui->lw_AvailableUpdates->count())
+		ui->tw_Main->setCurrentIndex(2);
+}
+//----------------------------------------------------------------------------------
+QString OrionLauncherWindow::GetUODirectoryPath(QString directoryPath)
+{
+	int pos = directoryPath.lastIndexOf('/');
+
+	if (pos == -1)
+		pos = directoryPath.lastIndexOf('\\');
+
+	if (pos != -1)
+		directoryPath.resize(pos);
+
+	return directoryPath;
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::UnpackArchive(const QByteArray &fileData, const QString &directoryPath, const QString &filePath)
+{
+	if (fileData.size())
+	{
+		QFile file(filePath);
+
+		if (file.open(QIODevice::WriteOnly))
+		{
+			file.write(fileData);
+			file.close();
+
+			QZipReader zipReader(filePath);
+
+			if (!zipReader.extractAll(directoryPath))
+				qDebug() << "Failed to unrar file:" << filePath;
+
+			zipReader.close();
+
+			QFile::remove(filePath);
+		}
+		else
+			qDebug() << "Failed to open file for write:" << filePath;
+	}
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
+{
+	int count = 0;
+
+	for (int i = 0; i < ui->lw_AvailableUpdates->count(); i++)
+	{
+		CUpdateListItem *item = (CUpdateListItem*)ui->lw_AvailableUpdates->item(i);
+
+		if (item != nullptr && item->checkState() == Qt::Checked)
+			count++;
+	}
+
+	if (count < 1)
+	{
+		ui->l_UpdateFileProcess->setText("No files to update");
+		return;
+	}
+
+	ui->pb_UpdateProgress->setMaximum(count);
+	ui->pb_UpdateProgress->setValue(0);
+
+	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
+		return;
+
+	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
+
+	for (int i = 0; i < ui->lw_AvailableUpdates->count(); i++)
+	{
+		CUpdateListItem *item = (CUpdateListItem*)ui->lw_AvailableUpdates->item(i);
+
+		if (item != nullptr && item->checkState() == Qt::Checked)
+		{
+			ui->l_UpdateFileProcess->setText("Process: " + item->ZipFileName);
+			QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/" + item->ZipFileName);
+
+			UnpackArchive(fileData, directoryPath, directoryPath + "/" + item->ZipFileName);
+			ui->pb_UpdateProgress->setValue(ui->pb_UpdateProgress->value() + 1);
+
+			qApp->processEvents();
+		}
+	}
+
+	ui->l_UpdateFileProcess->setText("Files updated!");
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_DownloadOAWithLibraries_clicked()
+{
+	ui->pb_UpdateProgress->setMaximum(1);
+	ui->pb_UpdateProgress->setValue(0);
+
+	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
+		return;
+
+	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
+
+	ui->l_UpdateFileProcess->setText("Downloading...");
+	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OA_Lib_Update.zip");
+
+	UnpackArchive(fileData, directoryPath, directoryPath + "/OA_Lib_Update.zip");
+	ui->pb_UpdateProgress->setValue(1);
+
+	ui->l_UpdateFileProcess->setText("Files updated!");
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
+{
+	ui->pb_UpdateProgress->setMaximum(1);
+	ui->pb_UpdateProgress->setValue(0);
+
+	if (QMessageBox::question(this, "Updates notification", "Press 'Yes' for start downloading.\nPress 'No' for cancel.") != QMessageBox::Yes)
+		return;
+
+	QString directoryPath = qApp->applicationDirPath();
+
+	ui->l_UpdateFileProcess->setText("Downloading...");
+	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OrionLauncher_Lib_Update.zip");
+
+	UnpackArchive(fileData, directoryPath, directoryPath + "/OrionLauncher_Lib_Update.zip");
+	ui->pb_UpdateProgress->setValue(1);
+
+	ui->l_UpdateFileProcess->setText("Files updated!");
 }
 //----------------------------------------------------------------------------------
