@@ -1109,6 +1109,8 @@ QByteArray OrionLauncherWindow::DownloadPage(const char *host, const QString &pa
 						result.append(temp);
 
 						InternetQueryDataAvailable(request, &size, 0, 0);
+
+						qApp->processEvents();
 					}
 				}
 				else
@@ -1134,12 +1136,22 @@ QByteArray OrionLauncherWindow::DownloadPage(const char *host, const QString &pa
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
 {
+	ui->pb_CheckUpdates->setEnabled(false);
+	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->pb_DownloadOAWithLibraries->setEnabled(false);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
+
 	ui->lw_AvailableUpdates->clear();
 
 	ParseHTML(DownloadPage("www.orion-client.online", "/Downloads/OrionUpdate.html"));
 
 	if (ui->lw_AvailableUpdates->count())
 		ui->tw_Main->setCurrentIndex(2);
+
+	ui->pb_CheckUpdates->setEnabled(true);
+	ui->pb_ApplyUpdates->setEnabled(true);
+	ui->pb_DownloadOAWithLibraries->setEnabled(true);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
 }
 //----------------------------------------------------------------------------------
 QString OrionLauncherWindow::GetUODirectoryPath(QString directoryPath)
@@ -1195,6 +1207,11 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
 		return;
 
+	ui->pb_CheckUpdates->setEnabled(false);
+	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->pb_DownloadOAWithLibraries->setEnabled(false);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
+
 	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
 	bool launcherFound = false;
 
@@ -1225,6 +1242,11 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 
 	ui->l_UpdateFileProcess->setText("Files updated!");
 
+	ui->pb_CheckUpdates->setEnabled(true);
+	ui->pb_ApplyUpdates->setEnabled(true);
+	ui->pb_DownloadOAWithLibraries->setEnabled(true);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
+
 	if (launcherFound && QFile::exists(qApp->applicationDirPath() + "/olupd.exe"))
 	{
 		SaveServerList();
@@ -1234,6 +1256,8 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 
 		exit(0);
 	}
+	else
+		on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_DownloadOAWithLibraries_clicked()
@@ -1244,15 +1268,27 @@ void OrionLauncherWindow::on_pb_DownloadOAWithLibraries_clicked()
 	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
 		return;
 
+	ui->pb_CheckUpdates->setEnabled(false);
+	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->pb_DownloadOAWithLibraries->setEnabled(false);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
+
 	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
 
 	ui->l_UpdateFileProcess->setText("Downloading...");
 	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OA_Lib_Update.zip");
 
-	UnpackArchive(fileData, directoryPath, directoryPath + "/OA_Lib_Update.zip", false);
+	UnpackArchive(fileData, directoryPath, directoryPath + "/OA_Lib_Update.zip", true);
 	ui->pb_UpdateProgress->setValue(1);
 
 	ui->l_UpdateFileProcess->setText("Files updated!");
+
+	ui->pb_CheckUpdates->setEnabled(true);
+	ui->pb_ApplyUpdates->setEnabled(true);
+	ui->pb_DownloadOAWithLibraries->setEnabled(true);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
+
+	on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
@@ -1262,6 +1298,11 @@ void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
 
 	if (QMessageBox::question(this, "Updates notification", "Press 'Yes' for start downloading.\nPress 'No' for cancel.") != QMessageBox::Yes)
 		return;
+
+	ui->pb_CheckUpdates->setEnabled(false);
+	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->pb_DownloadOAWithLibraries->setEnabled(false);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
 
 	QString directoryPath = qApp->applicationDirPath();
 
@@ -1279,6 +1320,11 @@ void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
 
 	ui->l_UpdateFileProcess->setText("Files updated!");
 
+	ui->pb_CheckUpdates->setEnabled(true);
+	ui->pb_ApplyUpdates->setEnabled(true);
+	ui->pb_DownloadOAWithLibraries->setEnabled(true);
+	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
+
 	if (QFile::exists(qApp->applicationDirPath() + "/olupd.exe"))
 	{
 		SaveServerList();
@@ -1288,5 +1334,7 @@ void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
 
 		exit(0);
 	}
+	else
+		on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
