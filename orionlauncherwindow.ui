@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -1220,6 +1220,14 @@
         <item>
          <property name="text">
           <string>Font color</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Extended target tile</string>
          </property>
          <property name="checkState">
           <enum>Checked</enum>
