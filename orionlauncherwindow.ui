@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -68,9 +68,9 @@
         <property name="geometry">
          <rect>
           <x>270</x>
-          <y>40</y>
+          <y>60</y>
           <width>331</width>
-          <height>291</height>
+          <height>271</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -107,7 +107,7 @@
           <property name="geometry">
            <rect>
             <x>130</x>
-            <y>160</y>
+            <y>170</y>
             <width>71</width>
             <height>23</height>
            </rect>
@@ -172,7 +172,7 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>230</y>
+            <y>220</y>
             <width>131</width>
             <height>17</height>
            </rect>
@@ -460,7 +460,7 @@
         <property name="geometry">
          <rect>
           <x>490</x>
-          <y>40</y>
+          <y>61</y>
           <width>111</width>
           <height>17</height>
          </rect>
@@ -470,6 +470,22 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pb_ConfigureClientVersion">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>34</y>
+          <width>151</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Configure client version</string>
         </property>
        </widget>
       </widget>

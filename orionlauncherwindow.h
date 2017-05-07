@@ -91,6 +91,8 @@ private slots:
 
 	void on_pb_DownloadLauncherWithLibraries_clicked();
 
+	void on_pb_ConfigureClientVersion_clicked();
+
 private:
 	Ui::OrionLauncherWindow *ui;
 

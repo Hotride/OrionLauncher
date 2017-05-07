@@ -956,7 +956,16 @@ void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
 	Q_UNUSED(index);
 
 	if (!m_Loading && ui->cb_CheckUpdates->isChecked())
+	{
 		on_pb_CheckUpdates_clicked();
+
+		QString configFilePath = GetUODirectoryPath(ui->cb_OrionPath->currentText()) + "/Client.cuo";
+
+		if (!QFile::exists(configFilePath))
+			ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0);");
+		else
+			ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(0, 0, 0);");
+	}
 }
 //----------------------------------------------------------------------------------
 uint OrionLauncherWindow::GetCrc(const QString &fileName)
@@ -1336,5 +1345,14 @@ void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
 	}
 	else
 		on_pb_CheckUpdates_clicked();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_ConfigureClientVersion_clicked()
+{
+	QString directoryPath = GetUODirectoryPath(ui->cb_OrionPath->currentText());
+	QString path = directoryPath + "/ConfigurationEditor.exe";
+
+	if (QFile::exists(path))
+		RunProgram(path, directoryPath);
 }
 //----------------------------------------------------------------------------------
