@@ -166,8 +166,6 @@ private:
 
 	bool m_Loading{ true };
 
-	QString GetUODirectoryPath(QString directoryPath);
-
 	void UpdateServerFields(const int &index);
 
 	QString BoolToText(const bool &value);
