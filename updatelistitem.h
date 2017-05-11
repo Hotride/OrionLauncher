@@ -25,6 +25,7 @@ public:
 	QString Hash{ "" };
 	QString ZipFileName{ "" };
 	QString Notes{ "" };
+	bool InUODir{ true };
 };
 //----------------------------------------------------------------------------------
 #endif // UPDATELISTITEM_H

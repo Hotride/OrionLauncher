@@ -1006,9 +1006,6 @@ uint OrionLauncherWindow::GetCrc(const QString &fileName)
 //----------------------------------------------------------------------------------
 bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash)
 {
-	if (name == "OrionLauncher.exe" || name == "olupd.exe")
-		directoryPath = qApp->applicationDirPath();
-
 	QString filePath = directoryPath + "/" + name;
 
 	if (!QFile::exists(filePath))
@@ -1093,7 +1090,10 @@ void OrionLauncherWindow::ParseHTML(const QString &html)
 				if (attributes.hasAttribute("updatenotes"))
 					updateInfo->Notes = attributes.value("updatenotes").toString();
 
-				if (updateInfo->ZipFileName.length() && WantUpdateFile(directoryPath, updateInfo->Name, updateInfo->Version.trimmed(), updateInfo->Hash.trimmed().toUpper()))
+				if (attributes.hasAttribute("uodir"))
+					updateInfo->InUODir = (attributes.value("uodir").toString().trimmed().toLower() == "yes");
+
+				if (updateInfo->ZipFileName.length() && WantUpdateFile((updateInfo->InUODir ? directoryPath : qApp->applicationDirPath()), updateInfo->Name, updateInfo->Version.trimmed(), updateInfo->Hash.trimmed().toUpper()))
 					ui->lw_AvailableUpdates->addItem(updateInfo);
 				else
 					delete updateInfo;
@@ -1238,13 +1238,18 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 			ui->l_UpdateFileProcess->setText("Process: " + item->ZipFileName);
 			QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/" + item->ZipFileName);
 
-			if (item->text() == "OrionLauncher.exe")
+			if (!item->InUODir)
 			{
-				launcherFound = true;
-				UnpackArchive(fileData, qApp->applicationDirPath(), qApp->applicationDirPath() + "/" + item->ZipFileName, false);
+				bool removeFile = true;
+
+				if (item->text() == "OrionLauncher.exe")
+				{
+					removeFile = false;
+					launcherFound = true;
+				}
+
+				UnpackArchive(fileData, qApp->applicationDirPath(), qApp->applicationDirPath() + "/" + item->ZipFileName, removeFile);
 			}
-			else if (item->text() == "olupd.exe")
-				UnpackArchive(fileData, qApp->applicationDirPath(), qApp->applicationDirPath() + "/" + item->ZipFileName, true);
 			else
 				UnpackArchive(fileData, directoryPath, directoryPath + "/" + item->ZipFileName, true);
 
