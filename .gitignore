@@ -3,3 +3,4 @@
 *.txt
 /release_bin
 Makefile*
+!/WikiData/RU/*.txt
