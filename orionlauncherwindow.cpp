@@ -47,7 +47,9 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
 
 	m_Loading = false;
 
-	if (ui->cb_CheckUpdates->isChecked())
+	if (!ui->cb_OrionPath->currentText().length())
+		on_tb_SetOrionPath_clicked();
+	else if (ui->cb_CheckUpdates->isChecked())
 		on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
