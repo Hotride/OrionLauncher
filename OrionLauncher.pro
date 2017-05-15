@@ -3,7 +3,8 @@
 # Project created by QtCreator 2016-12-20T16:45:23
 #
 #-------------------------------------------------
-VERSION = 1.0.0.8
+
+#VERSION = 1.0.0.9
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
@@ -29,3 +30,5 @@ HEADERS  += orionlauncherwindow.h \
     updatelistitem.h
 
 FORMS    += orionlauncherwindow.ui
+
+RC_FILE = orionlauncher.rc
