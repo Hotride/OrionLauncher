@@ -31,4 +31,6 @@ HEADERS  += orionlauncherwindow.h \
 
 FORMS    += orionlauncherwindow.ui
 
+OTHER_FILES += orionlauncher.rc
+
 RC_FILE = orionlauncher.rc

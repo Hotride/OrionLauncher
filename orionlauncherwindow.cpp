@@ -43,7 +43,7 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
 
 	UpdateOAFecturesCode();
 
-	setWindowTitle("Orion launcher " + QString(APP_VERSION));
+	setWindowTitle("Orion launcher " + QString(GetFileVersion(qApp->applicationFilePath())));
 
 	m_Loading = false;
 
@@ -1006,23 +1006,21 @@ uint OrionLauncherWindow::GetCrc(const QString &fileName)
 	return (crc ^ 0xFFFFFFFF);
 }
 //----------------------------------------------------------------------------------
-bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash)
+QString OrionLauncherWindow::GetFileVersion(const QString &path)
 {
-	QString filePath = directoryPath + "/" + name;
-
-	if (!QFile::exists(filePath))
-		return true;
+	if (!QFile::exists(path))
+		return "";
 
 	DWORD dummy = 0;
-	DWORD dwSize = GetFileVersionInfoSize(filePath.toStdWString().c_str(), &dummy);
+	DWORD dwSize = GetFileVersionInfoSize(path.toStdWString().c_str(), &dummy);
 
 	QString fileVersion;
 
-	if (version.length() && dwSize > 0)
+	if (dwSize > 0)
 	{
 		QByteArray lpVersionInfo(dwSize, 0);
 
-		if (GetFileVersionInfo(filePath.toStdWString().c_str(), 0, dwSize, lpVersionInfo.data()))
+		if (GetFileVersionInfo(path.toStdWString().c_str(), 0, dwSize, lpVersionInfo.data()))
 		{
 			UINT uLen = 0;
 			VS_FIXEDFILEINFO *lpFfi = NULL;
@@ -1045,9 +1043,22 @@ bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &n
 
 			fileVersion.sprintf("%i.%i.%i.%i", dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
 
-			return (fileVersion != version);
+			return fileVersion;
 		}
 	}
+
+	return "";
+}
+//----------------------------------------------------------------------------------
+bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash)
+{
+	QString filePath = directoryPath + "/" + name;
+
+	if (!QFile::exists(filePath))
+		return true;
+
+	if (version.length())
+		return (GetFileVersion(filePath) != version);
 
 	QString fileHash;
 

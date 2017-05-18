@@ -196,6 +196,8 @@ private:
 	bool WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash);
 
 	uint GetCrc(const QString &fileName);
+
+	QString GetFileVersion(const QString &path);
 };
 //----------------------------------------------------------------------------------
 extern OrionLauncherWindow *g_OrionLauncherWindow;
