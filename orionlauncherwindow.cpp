@@ -554,16 +554,16 @@ void OrionLauncherWindow::LoadServerList()
 		Q_UNUSED(version);
 		Q_UNUSED(count);
 
-        auto RemoveFileExtensionFunc =[](QString &str)
-        {
-            if (str.length() > 4 && str.lastIndexOf(".exe", -4, Qt::CaseInsensitive) == str.length() - 4)
-            {
-                int pos = qMax(str.lastIndexOf('/'), str.lastIndexOf('\\'));
+		auto RemoveFileExtensionFunc =[](QString &str)
+		{
+			if (str.length() > 4 && str.lastIndexOf(".exe", -4, Qt::CaseInsensitive) == str.length() - 4)
+			{
+				int pos = qMax(str.lastIndexOf('/'), str.lastIndexOf('\\'));
 
-                if (pos != -1)
-                    str.resize(pos);
-            }
-        };
+				if (pos != -1)
+					str.resize(pos);
+			}
+		};
 
 		while (!reader.atEnd() && !reader.hasError())
 		{
@@ -590,11 +590,11 @@ void OrionLauncherWindow::LoadServerList()
 
 					if (attributes.hasAttribute("path"))
 					{
-                        QString path = attributes.value("path").toString().trimmed();
+						QString path = attributes.value("path").toString().trimmed();
 
-                        RemoveFileExtensionFunc(path);
+						RemoveFileExtensionFunc(path);
 
-                        ui->cb_OrionPath->addItem(path);
+						ui->cb_OrionPath->addItem(path);
 						clientindex = 0;
 					}
 
@@ -605,9 +605,9 @@ void OrionLauncherWindow::LoadServerList()
 				{
 					if (attributes.hasAttribute("path"))
 					{
-                        QString path = attributes.value("path").toString().trimmed();
+						QString path = attributes.value("path").toString().trimmed();
 
-                        RemoveFileExtensionFunc(path);
+						RemoveFileExtensionFunc(path);
 
 						bool found = false;
 
@@ -694,7 +694,7 @@ void OrionLauncherWindow::on_tb_SetOrionPath_clicked()
 	if (!startPath.length())
 		startPath = QDir::currentPath();
 
-    QString path = QFileDialog::getExistingDirectory(nullptr, tr("Select OrionUO directory"), startPath);
+	QString path = QFileDialog::getExistingDirectory(nullptr, tr("Select OrionUO directory"), startPath);
 
 	if (path.length())
 	{
@@ -768,9 +768,9 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		return;
 	}
 
-    QString directoryPath = ui->cb_OrionPath->currentText();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 
-    QString program = ui->cb_OrionPath->currentText() + "/OrionUO.exe";
+	QString program = ui->cb_OrionPath->currentText() + "/OrionUO.exe";
 
 	QString command = ui->le_CommandLine->text();
 
@@ -979,7 +979,7 @@ void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
 	{
 		on_pb_CheckUpdates_clicked();
 
-        QString configFilePath = ui->cb_OrionPath->currentText() + "/Client.cuo";
+		QString configFilePath = ui->cb_OrionPath->currentText() + "/Client.cuo";
 
 		if (!QFile::exists(configFilePath))
 			ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0);");
@@ -1069,7 +1069,7 @@ bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &n
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::ParseHTML(const QString &html)
 {
-    QString directoryPath = ui->cb_OrionPath->currentText();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 
 	QXmlStreamReader reader(html);
 
@@ -1152,6 +1152,8 @@ QByteArray OrionLauncherWindow::DownloadPage(const char *host, const QString &pa
 
 						qApp->processEvents();
 					}
+
+					//qDebug() <<result.data();
 				}
 				else
 					qDebug() << "HttpSendRequest error";
@@ -1239,7 +1241,7 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 	ui->pb_DownloadOAWithLibraries->setEnabled(false);
 	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
 
-    QString directoryPath = ui->cb_OrionPath->currentText();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 	bool launcherFound = false;
 
 	for (int i = 0; i < ui->lw_AvailableUpdates->count(); i++)
@@ -1305,7 +1307,7 @@ void OrionLauncherWindow::on_pb_DownloadOAWithLibraries_clicked()
 	ui->pb_DownloadOAWithLibraries->setEnabled(false);
 	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
 
-    QString directoryPath = ui->cb_OrionPath->currentText();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 
 	ui->l_UpdateFileProcess->setText("Downloading...");
 	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OA_Lib_Update.zip");
@@ -1372,7 +1374,7 @@ void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ConfigureClientVersion_clicked()
 {
-    QString directoryPath = ui->cb_OrionPath->currentText();
+	QString directoryPath = ui->cb_OrionPath->currentText();
 	QString path = directoryPath + "/ConfigurationEditor.exe";
 
 	if (QFile::exists(path))
