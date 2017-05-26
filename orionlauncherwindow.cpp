@@ -160,6 +160,8 @@ void OrionLauncherWindow::on_pb_ServerAdd_clicked()
 	ui->lw_ServerList->setCurrentRow(ui->lw_ServerList->count() - 1);
 
 	SaveServerList();
+
+	UpdateServerFields(ui->lw_ServerList->count() - 1);
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ServerSave_clicked()
@@ -173,6 +175,12 @@ void OrionLauncherWindow::on_pb_ServerSave_clicked()
 	}
 
 	CServerListItem *selected = (CServerListItem*)ui->lw_ServerList->currentItem();
+
+	if (selected == nullptr)
+	{
+		QMessageBox::critical(this, "No selected item", "No selected server!");
+		return;
+	}
 
 	for (int i = 0; i < ui->lw_ServerList->count(); i++)
 	{
@@ -276,6 +284,8 @@ void OrionLauncherWindow::on_pb_ProxyAdd_clicked()
 	ui->lw_ProxyList->setCurrentRow(ui->lw_ProxyList->count() - 1);
 
 	SaveProxyList();
+
+	ui->cb_ServerProxy->addItem(ui->le_ProxyName->text());
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ProxySave_clicked()
@@ -289,6 +299,12 @@ void OrionLauncherWindow::on_pb_ProxySave_clicked()
 	}
 
 	CProxyListItem *selected = (CProxyListItem*)ui->lw_ProxyList->currentItem();
+
+	if (selected == nullptr)
+	{
+		QMessageBox::critical(this, "No selected item", "No selected proxy!");
+		return;
+	}
 
 	for (int i = 0; i < ui->lw_ProxyList->count(); i++)
 	{
@@ -315,6 +331,8 @@ void OrionLauncherWindow::on_pb_ProxySave_clicked()
 	selected->SetEncrypted(ui->cb_ProxyEncryptPassword->isChecked());
 
 	SaveProxyList();
+
+	ui->cb_ServerProxy->setItemText(ui->lw_ProxyList->currentRow(), ui->le_ProxyName->text());
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ProxyRemove_clicked()
@@ -323,10 +341,13 @@ void OrionLauncherWindow::on_pb_ProxyRemove_clicked()
 
 	if (item != nullptr)
 	{
-		item = ui->lw_ProxyList->takeItem(ui->lw_ProxyList->row(item));
+		int index = ui->lw_ProxyList->row(item);
+		item = ui->lw_ProxyList->takeItem(index);
 
 		if (item != nullptr)
 		{
+			ui->cb_ServerProxy->removeItem(index);
+
 			delete item;
 
 			SaveProxyList();
@@ -523,6 +544,7 @@ void OrionLauncherWindow::LoadProxyList()
 							item->SetEncrypted(RawStringToBool(attributes.value("encrypted").toString()));
 
 						ui->lw_ProxyList->addItem(item);
+						ui->cb_ServerProxy->addItem(attributes.value("name").toString());
 					}
 				}
 			}
