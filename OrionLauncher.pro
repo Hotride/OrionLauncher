@@ -34,3 +34,6 @@ FORMS    += orionlauncherwindow.ui
 OTHER_FILES += orionlauncher.rc
 
 RC_FILE = orionlauncher.rc
+
+RESOURCES += \
+    res.qrc
