@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -741,7 +741,7 @@
           <x>10</x>
           <y>30</y>
           <width>256</width>
-          <height>211</height>
+          <height>231</height>
          </rect>
         </property>
        </widget>
@@ -771,22 +771,6 @@
          <string>Check updates</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pb_DownloadOAWithLibraries">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>310</x>
-          <y>30</y>
-          <width>251</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Download Orion Assistant with libraries</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pb_ApplyUpdates">
         <property name="geometry">
          <rect>
@@ -811,32 +795,6 @@
         </property>
         <property name="value">
          <number>0</number>
-        </property>
-       </widget>
-       <widget class="QLabel" name="l_UpdateFileProcess">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>250</y>
-          <width>251</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Update progress</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pb_DownloadLauncherWithLibraries">
-        <property name="geometry">
-         <rect>
-          <x>310</x>
-          <y>70</y>
-          <width>251</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Download Orion Launcher with libraries</string>
         </property>
        </widget>
       </widget>

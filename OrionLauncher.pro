@@ -8,9 +8,9 @@
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
-QT       += core gui
+QT       += core gui concurrent
 
-LIBS = libshell32 libwininet libversion
+include("$$PWD/UpdateManager/UpdateManager.pri")
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,14 +20,12 @@ TEMPLATE = app
 SOURCES += main.cpp\
         orionlauncherwindow.cpp \
     serverlistitem.cpp \
-    proxylistitem.cpp \
-    updatelistitem.cpp
+    proxylistitem.cpp
 
 HEADERS  += orionlauncherwindow.h \
     serverlistitem.h \
     proxylistitem.h \
-    qzipreader_p.h \
-    updatelistitem.h
+    qzipreader_p.h
 
 FORMS    += orionlauncherwindow.ui
 

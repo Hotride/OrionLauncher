@@ -20,18 +20,23 @@
 #include <windows.h>
 #include <Wininet.h>
 #include "qzipreader_p.h"
-#include "updatelistitem.h"
+#include <QtConcurrent>
 #include <QDebug>
 
 OrionLauncherWindow *g_OrionLauncherWindow = nullptr;
 //----------------------------------------------------------------------------------
-OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::OrionLauncherWindow)
+OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
+: QMainWindow(parent), ui(new Ui::OrionLauncherWindow)
 {
 	ui->setupUi(this);
 
 	g_OrionLauncherWindow = this;
+
+	qRegisterMetaType<QList<CUpdateInfo>>("QList<CUpdateInfo>");
+
+	connect(this, SIGNAL(signal_UpdatesListReceived(QList<CUpdateInfo>)), this, SLOT(slot_UpdatesListReceived(QList<CUpdateInfo>)));
+	connect(this, SIGNAL(signal_FileReceived(QByteArray, QString)), this, SLOT(slot_FileReceived(QByteArray, QString)));
+	connect(this, SIGNAL(signal_FileReceivedNotification(QString)), this, SLOT(slot_FileReceivedNotification(QString)));
 
 	setFixedSize(size());
 
@@ -43,7 +48,12 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent) :
 
 	UpdateOAFecturesCode();
 
-	setWindowTitle("Orion launcher " + QString(GetFileVersion(qApp->applicationFilePath())));
+	QString crc32 = "";
+	QString version = "";
+
+	CUpdateManager<OrionLauncherWindow>::GetFileInfo(qApp->applicationFilePath(), version, crc32);
+
+	setWindowTitle("Orion launcher " + version);
 
 	m_Loading = false;
 
@@ -981,7 +991,7 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 	else if (ui->rb_OAFeaturesPOL->isChecked())
 	{
 		code.sprintf("program oafeatures_sendpacket(who)\n"
-					 "var res := SendPacket(who, \"FC15A001%08X%08X%08X%08X\");\n"
+					 "var res := SendPacket(who, \"FC0015A001%08X%08X%08X%08X\");\n"
 					 "if (!res)\n"
 						 "print(\"SendPacket error: \" + res.errortext );\n"
 					 "endif\n"
@@ -1010,249 +1020,100 @@ void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
 	}
 }
 //----------------------------------------------------------------------------------
-uint OrionLauncherWindow::GetCrc(const QString &fileName)
+void OrionLauncherWindow::slot_UpdatesListReceived(QList<CUpdateInfo> list)
 {
-	uint crc = 0xFFFFFFFF;
-
-	QFile file(fileName);
-
-	if (file.open(QIODevice::ReadOnly))
-	{
-		QByteArray fileData = file.readAll();
-		file.close();
-
-		for (const uchar &c : fileData)
-			crc = (crc >> 8) ^ m_CRC_Table[(crc & 0xFF) ^ c];
-	}
-
-	return (crc ^ 0xFFFFFFFF);
-}
-//----------------------------------------------------------------------------------
-QString OrionLauncherWindow::GetFileVersion(const QString &path)
-{
-	if (!QFile::exists(path))
-		return "";
-
-	DWORD dummy = 0;
-	DWORD dwSize = GetFileVersionInfoSize(path.toStdWString().c_str(), &dummy);
-
-	QString fileVersion;
-
-	if (dwSize > 0)
-	{
-		QByteArray lpVersionInfo(dwSize, 0);
-
-		if (GetFileVersionInfo(path.toStdWString().c_str(), 0, dwSize, lpVersionInfo.data()))
-		{
-			UINT uLen = 0;
-			VS_FIXEDFILEINFO *lpFfi = NULL;
-
-			VerQueryValue(lpVersionInfo.data(), L"\\", (LPVOID *)&lpFfi, &uLen);
-
-			DWORD dwFileVersionMS = 0;
-			DWORD dwFileVersionLS = 0;
-
-			if (lpFfi != NULL)
-			{
-				dwFileVersionMS = lpFfi->dwFileVersionMS;
-				dwFileVersionLS = lpFfi->dwFileVersionLS;
-			}
-
-			int dwLeftMost = (int)HIWORD(dwFileVersionMS);
-			int dwSecondLeft = (int)LOWORD(dwFileVersionMS);
-			int dwSecondRight = (int)HIWORD(dwFileVersionLS);
-			int dwRightMost = (int)LOWORD(dwFileVersionLS);
-
-			fileVersion.sprintf("%i.%i.%i.%i", dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
-
-			return fileVersion;
-		}
-	}
-
-	return "";
-}
-//----------------------------------------------------------------------------------
-bool OrionLauncherWindow::WantUpdateFile(QString directoryPath, const QString &name, const QString &version, const QString &hash)
-{
-	QString filePath = directoryPath + "/" + name;
-
-	if (!QFile::exists(filePath))
-		return true;
-
-	if (version.length())
-		return (GetFileVersion(filePath) != version);
-
-	QString fileHash;
-
-	fileHash.sprintf("%08X", GetCrc(filePath));
-
-	return (fileHash != hash);
-}
-//----------------------------------------------------------------------------------
-void OrionLauncherWindow::ParseHTML(const QString &html)
-{
+	ui->lw_AvailableUpdates->clear();
 	QString directoryPath = ui->cb_OrionPath->currentText();
 
-	QXmlStreamReader reader(html);
-
-	//qDebug() << "ParseHTML:\n" << html;
-
-	while (!reader.atEnd() && !reader.hasError())
+	for (const CUpdateInfo &info : list)
 	{
-		if (reader.isStartElement())
-		{
-			QXmlStreamAttributes attributes = reader.attributes();
+		QString crc32 = "";
+		QString version = "";
 
-			if (reader.name().toString().trimmed().toLower() == "meta")
-			{
-				CUpdateListItem *updateInfo = new CUpdateListItem();
+		bool wantUpdate = !CUpdateManager<OrionLauncherWindow>::GetFileInfo((info.UODir == "yes" ? directoryPath : qApp->applicationDirPath()) + "/" + info.Name, version, crc32);
 
-				if (attributes.hasAttribute("name"))
-				{
-					updateInfo->Name = attributes.value("name").toString();
-					updateInfo->setText(updateInfo->Name);
-				}
+		if (info.Version.length() && info.Version != version)
+			wantUpdate = true;
 
-				if (attributes.hasAttribute("version"))
-					updateInfo->Version = attributes.value("version").toString();
+		if (info.Hash.length() && info.Hash != crc32)
+			wantUpdate = true;
 
-				if (attributes.hasAttribute("hash"))
-					updateInfo->Hash = attributes.value("hash").toString();
-
-				if (attributes.hasAttribute("filename"))
-					updateInfo->ZipFileName = attributes.value("filename").toString();
-
-				if (attributes.hasAttribute("updatenotes"))
-					updateInfo->Notes = attributes.value("updatenotes").toString();
-
-				if (attributes.hasAttribute("uodir"))
-					updateInfo->InUODir = (attributes.value("uodir").toString().trimmed().toLower() == "yes");
-
-				if (updateInfo->ZipFileName.length() && WantUpdateFile((updateInfo->InUODir ? directoryPath : qApp->applicationDirPath()), updateInfo->Name, updateInfo->Version.trimmed(), updateInfo->Hash.trimmed().toUpper()))
-					ui->lw_AvailableUpdates->addItem(updateInfo);
-				else
-					delete updateInfo;
-			}
-		}
-
-		reader.readNext();
+		if (wantUpdate)
+			ui->lw_AvailableUpdates->addItem(new CUpdateInfoListWidgetItem(info));
 	}
-}
-//----------------------------------------------------------------------------------
-QByteArray OrionLauncherWindow::DownloadPage(const char *host, const QString &path)
-{
-	QByteArray result;
-
-	HINTERNET session = InternetOpen(NULL, INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
-
-	if (session)
-	{
-		HINTERNET connect = InternetConnectA(session, host, INTERNET_DEFAULT_HTTP_PORT, 0, 0, INTERNET_SERVICE_HTTP, 0, 1);
-
-		if (connect)
-		{
-			HINTERNET request = HttpOpenRequestW(connect, L"GET", path.toStdWString().c_str(), HTTP_VERSION, 0, 0, INTERNET_FLAG_KEEP_CONNECTION, 1);
-
-			if (request)
-			{
-				if (HttpSendRequest(request, 0, 0, 0, 0))
-				{
-					DWORD size = 0;
-					InternetQueryDataAvailable(request, &size, 0, 0);
-
-					while (size)
-					{
-						QByteArray temp(size, 0);
-						DWORD nbr = 0;
-
-						if (!InternetReadFile(request, temp.data(), size, &nbr))
-							break;
-
-						result.append(temp);
-
-						InternetQueryDataAvailable(request, &size, 0, 0);
-
-						qApp->processEvents();
-					}
-
-					//qDebug() <<result.data();
-				}
-				else
-					qDebug() << "HttpSendRequest error";
-
-				InternetCloseHandle(request);
-			}
-			else
-				qDebug() << "Request error";
-
-			InternetCloseHandle(connect);
-		}
-		else
-			qDebug() << "Connection error";
-
-		InternetCloseHandle(session);
-	}
-	else
-		qDebug() << "Session error";
-
-	return result;
-}
-//----------------------------------------------------------------------------------
-void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
-{
-	ui->pb_CheckUpdates->setEnabled(false);
-	ui->pb_ApplyUpdates->setEnabled(false);
-	ui->pb_DownloadOAWithLibraries->setEnabled(false);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
-
-	ui->lw_AvailableUpdates->clear();
-
-	ParseHTML(DownloadPage("www.orion-client.online", "/Downloads/OrionUpdate.html"));
 
 	if (ui->lw_AvailableUpdates->count())
 		ui->tw_Main->setCurrentIndex(2);
 
 	ui->pb_CheckUpdates->setEnabled(true);
 	ui->pb_ApplyUpdates->setEnabled(true);
-	ui->pb_DownloadOAWithLibraries->setEnabled(true);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
+	ui->pb_UpdateProgress->setValue(100);
 }
 //----------------------------------------------------------------------------------
-void OrionLauncherWindow::UnpackArchive(const QByteArray &fileData, const QString &directoryPath, const QString &filePath, const bool &removeArchive)
+void OrionLauncherWindow::slot_FileReceived(QByteArray array, QString name)
 {
-	if (fileData.size())
+	Q_UNUSED(array);
+	Q_UNUSED(name);
+	//qDebug() << "slot_FileReceived" << array.size() << name;
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::slot_FileReceivedNotification(QString name)
+{
+	Q_UNUSED(name);
+	//qDebug() << "slot_FileReceivedNotification" << name;
+
+	m_FilesToUpdateCount--;
+
+	if (m_FilesToUpdateCount <= 0 || ui->lw_AvailableUpdates->count() <= 0)
 	{
-		QFile file(filePath);
+		ui->pb_CheckUpdates->setEnabled(true);
+		ui->pb_ApplyUpdates->setEnabled(true);
+		ui->pb_UpdateProgress->setValue(100);
+		m_FilesToUpdateCount = 0;
 
-		if (file.open(QIODevice::WriteOnly))
+		if (m_LauncherFoundInUpdates && QFile::exists(qApp->applicationDirPath() + "/olupd.exe"))
 		{
-			file.write(fileData);
-			file.close();
+			SaveServerList();
+			SaveProxyList();
 
-			QZipReader zipReader(filePath);
+			RunProgram(qApp->applicationDirPath() + "/olupd.exe /OrionLauncher_Update.zip", qApp->applicationDirPath());
 
-			if (!zipReader.extractAll(directoryPath))
-				qDebug() << "Failed to unrar file:" << filePath;
-
-			zipReader.close();
-
-			if (removeArchive)
-				QFile::remove(filePath);
+			exit(0);
 		}
 		else
-			qDebug() << "Failed to open file for write:" << filePath;
+			on_pb_CheckUpdates_clicked();
 	}
+	else
+	{
+		ui->pb_UpdateProgress->setValue(((ui->lw_AvailableUpdates->count() - m_FilesToUpdateCount) * 100) / ui->lw_AvailableUpdates->count());
+	}
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
+{
+	if (!ui->pb_CheckUpdates->isEnabled())
+		return;
+
+	ui->pb_CheckUpdates->setEnabled(false);
+	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->pb_UpdateProgress->setValue(0);
+
+	ui->lw_AvailableUpdates->clear();
+
+	QtConcurrent::run(&CUpdateManager<OrionLauncherWindow>::CheckUpdates, QStringList() << "www.orion-client.online" << "/Downloads/" << "OrionUpdate.html", this);
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 {
+	if (!ui->pb_CheckUpdates->isEnabled())
+		return;
+
 	if (ui->lw_AvailableUpdates->count() < 1)
 	{
-		ui->l_UpdateFileProcess->setText("No files to update");
+		ui->pb_UpdateProgress->setValue(100);
 		return;
 	}
 
-	ui->pb_UpdateProgress->setMaximum(ui->lw_AvailableUpdates->count());
 	ui->pb_UpdateProgress->setValue(0);
 
 	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
@@ -1260,138 +1121,52 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 
 	ui->pb_CheckUpdates->setEnabled(false);
 	ui->pb_ApplyUpdates->setEnabled(false);
-	ui->pb_DownloadOAWithLibraries->setEnabled(false);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
 
 	QString directoryPath = ui->cb_OrionPath->currentText();
-	bool launcherFound = false;
+	m_LauncherFoundInUpdates = false;
+	m_FilesToUpdateCount = 0;
 
-	for (int i = 0; i < ui->lw_AvailableUpdates->count(); i++)
+	QList<CUpdateInfoListWidgetItem*> updateList;
+
+	for (int i = 0 ; i < ui->lw_AvailableUpdates->count(); i++)
 	{
-		CUpdateListItem *item = (CUpdateListItem*)ui->lw_AvailableUpdates->item(i);
+		CUpdateInfoListWidgetItem *item = (CUpdateInfoListWidgetItem*)ui->lw_AvailableUpdates->item(i);
 
-		if (item != nullptr)
+		if (item == nullptr)
+			continue;
+
+		m_FilesToUpdateCount++;
+
+		updateList.push_back(item);
+	}
+
+	if (m_FilesToUpdateCount)
+	{
+		for (CUpdateInfoListWidgetItem *item : updateList)
 		{
-			ui->l_UpdateFileProcess->setText("Process: " + item->ZipFileName);
-			QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/" + item->ZipFileName);
+			bool removeFile = true;
+			QString path = directoryPath;
 
-			if (!item->InUODir)
+			if (item->m_Info.UODir != "yes")
 			{
-				bool removeFile = true;
-
 				if (item->text() == "OrionLauncher.exe")
 				{
 					removeFile = false;
-					launcherFound = true;
+					m_LauncherFoundInUpdates = true;
 				}
 
-				UnpackArchive(fileData, qApp->applicationDirPath(), qApp->applicationDirPath() + "/" + item->ZipFileName, removeFile);
+				path = qApp->applicationDirPath();
 			}
-			else
-				UnpackArchive(fileData, directoryPath, directoryPath + "/" + item->ZipFileName, true);
 
-			ui->pb_UpdateProgress->setValue(ui->pb_UpdateProgress->value() + 1);
-
-			qApp->processEvents();
+			QtConcurrent::run(&CUpdateManager<OrionLauncherWindow>::DownloadFile, QStringList() << "www.orion-client.online" << "/Downloads/" << item->m_Info.ZipFileName, this, QString(path + "/" + item->m_Info.ZipFileName), removeFile);
 		}
 	}
-
-	ui->l_UpdateFileProcess->setText("Files updated!");
-
-	ui->pb_CheckUpdates->setEnabled(true);
-	ui->pb_ApplyUpdates->setEnabled(true);
-	ui->pb_DownloadOAWithLibraries->setEnabled(true);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
-
-	if (launcherFound && QFile::exists(qApp->applicationDirPath() + "/olupd.exe"))
-	{
-		SaveServerList();
-		SaveProxyList();
-
-		RunProgram(qApp->applicationDirPath() + "/olupd.exe /OrionLauncher_Update.zip", qApp->applicationDirPath());
-
-		exit(0);
-	}
 	else
-		on_pb_CheckUpdates_clicked();
-}
-//----------------------------------------------------------------------------------
-void OrionLauncherWindow::on_pb_DownloadOAWithLibraries_clicked()
-{
-	ui->pb_UpdateProgress->setMaximum(1);
-	ui->pb_UpdateProgress->setValue(0);
-
-	if (QMessageBox::question(this, "Updates notification", "Close all OrionUO windows and press 'Yes'.\nPress 'No' for cancel.") != QMessageBox::Yes)
-		return;
-
-	ui->pb_CheckUpdates->setEnabled(false);
-	ui->pb_ApplyUpdates->setEnabled(false);
-	ui->pb_DownloadOAWithLibraries->setEnabled(false);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
-
-	QString directoryPath = ui->cb_OrionPath->currentText();
-
-	ui->l_UpdateFileProcess->setText("Downloading...");
-	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OA_Lib_Update.zip");
-
-	UnpackArchive(fileData, directoryPath, directoryPath + "/OA_Lib_Update.zip", true);
-	ui->pb_UpdateProgress->setValue(1);
-
-	ui->l_UpdateFileProcess->setText("Files updated!");
-
-	ui->pb_CheckUpdates->setEnabled(true);
-	ui->pb_ApplyUpdates->setEnabled(true);
-	ui->pb_DownloadOAWithLibraries->setEnabled(true);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
-
-	on_pb_CheckUpdates_clicked();
-}
-//----------------------------------------------------------------------------------
-void OrionLauncherWindow::on_pb_DownloadLauncherWithLibraries_clicked()
-{
-	ui->pb_UpdateProgress->setMaximum(2);
-	ui->pb_UpdateProgress->setValue(0);
-
-	if (QMessageBox::question(this, "Updates notification", "Press 'Yes' for start downloading.\nPress 'No' for cancel.") != QMessageBox::Yes)
-		return;
-
-	ui->pb_CheckUpdates->setEnabled(false);
-	ui->pb_ApplyUpdates->setEnabled(false);
-	ui->pb_DownloadOAWithLibraries->setEnabled(false);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(false);
-
-	QString directoryPath = qApp->applicationDirPath();
-
-	ui->l_UpdateFileProcess->setText("Downloading...");
-	QByteArray fileDataUpd = DownloadPage("www.orion-client.online", "/Downloads/olupd.zip");
-	UnpackArchive(fileDataUpd, directoryPath, directoryPath + "/olupd.zip", true);
-
-	ui->pb_UpdateProgress->setValue(1);
-
-	QByteArray fileData = DownloadPage("www.orion-client.online", "/Downloads/OrionLauncher_Lib_Update.zip");
-
-	UnpackArchive(fileData, directoryPath, directoryPath + "/OrionLauncher_Lib_Update.zip", false);
-
-	ui->pb_UpdateProgress->setValue(2);
-
-	ui->l_UpdateFileProcess->setText("Files updated!");
-
-	ui->pb_CheckUpdates->setEnabled(true);
-	ui->pb_ApplyUpdates->setEnabled(true);
-	ui->pb_DownloadOAWithLibraries->setEnabled(true);
-	ui->pb_DownloadLauncherWithLibraries->setEnabled(true);
-
-	if (QFile::exists(qApp->applicationDirPath() + "/olupd.exe"))
 	{
-		SaveServerList();
-		SaveProxyList();
-
-		RunProgram(qApp->applicationDirPath() + "/olupd.exe /OrionLauncher_Lib_Update.zip", qApp->applicationDirPath());
-
-		exit(0);
+		ui->pb_CheckUpdates->setEnabled(true);
+		ui->pb_ApplyUpdates->setEnabled(true);
+		ui->pb_UpdateProgress->setValue(100);
 	}
-	else
-		on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ConfigureClientVersion_clicked()
