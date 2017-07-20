@@ -1,4 +1,4 @@
-/**
+﻿/**
 @file UpdateManager.hpp
 
 @brief Класс для работы с обновлениями
@@ -293,7 +293,7 @@ public:
 
 			if (connect)
 			{
-				HINTERNET request = HttpOpenRequestA(connect, "GET", (path + page).toLocal8Bit(), HTTP_VERSIONA, 0, 0, INTERNET_FLAG_KEEP_CONNECTION, 1);
+				HINTERNET request = HttpOpenRequestA(connect, "GET", (path + page).toLocal8Bit(), HTTP_VERSIONA, 0, 0, INTERNET_FLAG_KEEP_CONNECTION | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_RELOAD, 1);
 
 				if (request)
 				{
