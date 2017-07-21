@@ -788,7 +788,7 @@ void OrionLauncherWindow::RunProgram(const QString &exePath, const QString &dire
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
 	}
-};
+}
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_Launch_clicked()
 {
@@ -869,7 +869,7 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		SaveServerList();
 		SaveProxyList();
 
-		exit(0);
+		qApp->exit(0);
 	}
 }
 //----------------------------------------------------------------------------------
