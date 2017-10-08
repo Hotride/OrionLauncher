@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-#VERSION = 1.0.0.9
-
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT       += core gui concurrent
