@@ -61,8 +61,8 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 
 	if (!ui->cb_OrionPath->currentText().length())
 		on_tb_SetOrionPath_clicked();
-	else if (ui->cb_CheckUpdates->isChecked())
-		on_pb_CheckUpdates_clicked();
+
+	on_cb_OrionPath_currentIndexChanged(ui->cb_OrionPath->currentIndex());
 }
 //----------------------------------------------------------------------------------
 OrionLauncherWindow::~OrionLauncherWindow()
@@ -803,6 +803,22 @@ void OrionLauncherWindow::RunProgram(const QString &exePath, const QString &dire
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_Launch_clicked()
 {
+	QString directoryPath = ui->cb_OrionPath->currentText();
+
+	if (!QFile::exists(ui->cb_OrionPath->currentText() + "/Client.cuo"))
+	{
+		ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0);");
+
+		QString configErrorText = "You miss file 'Client.cuo'!\nYou must create it with ConfigurationEditor.exe tool.";
+
+		if (QFile::exists(directoryPath + "/ConfigurationEditor.exe"))
+			configErrorText += "\nPress ok to start the tool.";
+
+		QMessageBox::critical(this, "Configuration error!", configErrorText);
+		on_pb_ConfigureClientVersion_clicked();
+		return;
+	}
+
 	CServerListItem *serverItem = (CServerListItem*)ui->lw_ServerList->currentItem();
 
 	if (serverItem == nullptr)
@@ -810,8 +826,6 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 		QMessageBox::critical(this, tr("Launch error"), tr("Server is not selected!"));
 		return;
 	}
-
-	QString directoryPath = ui->cb_OrionPath->currentText();
 
 	QString program = ui->cb_OrionPath->currentText() + "/OrionUO.exe";
 
@@ -1018,9 +1032,10 @@ void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
 {
 	Q_UNUSED(index);
 
-	if (!m_Loading && ui->cb_CheckUpdates->isChecked())
+	if (!m_Loading)
 	{
-		on_pb_CheckUpdates_clicked();
+		if (ui->cb_CheckUpdates->isChecked())
+			on_pb_CheckUpdates_clicked();
 
 		QString configFilePath = ui->cb_OrionPath->currentText() + "/Client.cuo";
 
