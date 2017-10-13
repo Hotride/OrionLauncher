@@ -41,6 +41,40 @@ public:
 };
 //----------------------------------------------------------------------------------
 /**
+ * @brief The CUpdateInfo class
+ * Информация о файле
+ */
+class CBackupInfo
+{
+public:
+	CBackupInfo() {}
+	~CBackupInfo() {}
+
+	//! Название
+	QString Name{ "" };
+
+	//! Название архива с файлом/файлами (как называется на сервере)
+	QString ZipFileName{ "" };
+};
+//----------------------------------------------------------------------------------
+/**
+ * @brief The CUpdateInfo class
+ * Информация о файле
+ */
+class CChangelogInfo
+{
+public:
+	CChangelogInfo() {}
+	~CChangelogInfo() {}
+
+	//! Название
+	QString Name{ "" };
+
+	//! Описание
+	QString Description{ "" };
+};
+//----------------------------------------------------------------------------------
+/**
  * @brief The CUpdateInfoListWidgetItem class
  * Элемент QListWidget с информацией о обновлении
  */
@@ -61,6 +95,29 @@ public:
 
 	//! Информация о обновлении
 	CUpdateInfo m_Info;
+};
+//----------------------------------------------------------------------------------
+/**
+ * @brief The CBackupInfoListWidgetItem class
+ * Элемент QListWidget с информацией о резервной версии
+ */
+class CBackupInfoListWidgetItem : public QListWidgetItem
+{
+public:
+	CBackupInfoListWidgetItem(const CBackupInfo &backup)
+	: QListWidgetItem(), m_Backup(backup)
+	{
+		//! Отображаемый текст - имя файла
+		setText(backup.Name);
+
+		//! Выбран галочкой в списке
+		//setCheckState(Qt::Checked);
+	}
+
+	virtual ~CBackupInfoListWidgetItem() {}
+
+	//! Информация о обновлении
+	CBackupInfo m_Backup;
 };
 //----------------------------------------------------------------------------------
 #endif // UPDATEINFO_H

@@ -23,7 +23,8 @@ enum REQUEST_TYPE
 {
 	RT_CHECK_UPDATES = 0,	//! Запрос обновлений
 	RT_DOWNLOAD_FILE,		//! Скачивание файла
-	RT_AUTO_UPDATE			//! Автоматическое обновление всех доступных файлов (запрос + проверка + скачка в случае необходимости)
+	RT_AUTO_UPDATE,			//! Автоматическое обновление всех доступных файлов (запрос + проверка + скачка в случае необходимости)
+	RT_GET_CHANGELOG		//! Запрос истории изменений
 };
 //----------------------------------------------------------------------------------
 /**
@@ -120,7 +121,7 @@ private:
 	 * @param xml Данные
 	 * @param updateList Сформированный список обновлений
 	 */
-	void ParseXML(const QString &xml, QList<CUpdateInfo> &updateList)
+	void ParseXML(const QString &xml, QList<CUpdateInfo> &updateList, QList<CBackupInfo> &backupsList, QList<CChangelogInfo> &changelogList)
 	{
 		//qDebug() << "ParseXML (type:" << m_Type << "):\n" << xml;
 
@@ -128,6 +129,16 @@ private:
 #define ReadMetaValue(var, name) \
 	if (attributes.hasAttribute(name)) \
 		info.var = attributes.value(name).toString()
+
+//! Макрос для считывания XML данных в поля структуры CBackupInfo
+#define ReadMetaValueB(var, name) \
+	if (attributes.hasAttribute(name)) \
+		backup.var = attributes.value(name).toString()
+
+//! Макрос для считывания XML данных в поля структуры CChangelogInfo
+#define ReadMetaValueC(var, name) \
+	if (attributes.hasAttribute(name)) \
+		changelog.var = attributes.value(name).toString()
 
 		QXmlStreamReader reader(xml);
 
@@ -142,15 +153,16 @@ private:
 					CUpdateInfo info;
 
 					ReadMetaValue(Name, "name");
-					ReadMetaValue(Version, "version");
-					ReadMetaValue(Hash, "hash");
-					ReadMetaValue(ZipFileName, "filename");
-					ReadMetaValue(Notes, "updatenotes");
-					ReadMetaValue(UODir, "uodir");
 
 					//! Добавляем только если есть имя
 					if (info.Name.length())
 					{
+						ReadMetaValue(Version, "version");
+						ReadMetaValue(Hash, "hash");
+						ReadMetaValue(ZipFileName, "filename");
+						ReadMetaValue(Notes, "updatenotes");
+						ReadMetaValue(UODir, "uodir");
+
 						//! Проверка файла при автообновлении
 						if (m_Type == RT_AUTO_UPDATE)
 						{
@@ -170,6 +182,28 @@ private:
 						}
 						else
 							updateList.push_back(info);
+					}
+					else
+					{
+						CBackupInfo backup;
+						ReadMetaValueB(Name, "backup");
+
+						if (backup.Name.length())
+						{
+							ReadMetaValueB(ZipFileName, "filename");
+							backupsList.push_back(backup);
+						}
+						else
+						{
+							CChangelogInfo changelog;
+							ReadMetaValueC(Name, "changelog");
+
+							if (changelog.Name.length())
+							{
+								ReadMetaValueC(Description, "description");
+								changelogList.push_back(changelog);
+							}
+						}
 					}
 				}
 			}
@@ -219,6 +253,7 @@ public:
 		else
 		{
 			//! Защита от зависания, уведомим ресивера о окончании процедуры
+			emit receiver->signal_BackupsListReceived(QList<CBackupInfo>());
 			emit receiver->signal_UpdatesListReceived(QList<CUpdateInfo>());
 		}
 	}
@@ -246,6 +281,30 @@ public:
 		{
 			//! Защита от зависания, уведомим ресивера о окончании процедуры
 			emit receiver->signal_FileReceivedNotification(filePathToSave);
+		}
+	}
+
+	//----------------------------------------------------------------------------------
+	/**
+	 * @brief GetChangelog Функция получения истории изменений
+	 * @param params Параметры подключения [0] - host, [1] - path, [2] - page
+	 * @param receiver Приемнник сигналов
+	 */
+	static void GetChangelog(const QStringList &params, T *receiver)
+	{
+		if (receiver == nullptr)
+			return;
+
+		if (params.size() >= 3)
+		{
+			CUpdateManager<T> manager(receiver, RT_GET_CHANGELOG, "", true, "");
+
+			manager.ConnectToPage(params.at(0), params.at(1), params.at(2));
+		}
+		else
+		{
+			//! Защита от зависания, уведомим ресивера о окончании процедуры
+			emit receiver->signal_ChangelogReceived(QList<CChangelogInfo>());
 		}
 	}
 
@@ -329,9 +388,12 @@ public:
 			case RT_CHECK_UPDATES:
 			{
 				QList<CUpdateInfo> updateList;
+				QList<CBackupInfo> backupsList;
+				QList<CChangelogInfo> changelogList;
 
-				ParseXML(result, updateList);
+				ParseXML(result, updateList, backupsList, changelogList);
 
+				emit m_Receiver->signal_BackupsListReceived(backupsList);
 				emit m_Receiver->signal_UpdatesListReceived(updateList);
 
 				break;
@@ -347,12 +409,26 @@ public:
 
 				break;
 			}
+			case RT_GET_CHANGELOG:
+			{
+				QList<CUpdateInfo> updateList;
+				QList<CBackupInfo> backupsList;
+				QList<CChangelogInfo> changelogList;
+
+				ParseXML(result, updateList, backupsList, changelogList);
+
+				emit m_Receiver->signal_ChangelogReceived(changelogList);
+
+				break;
+			}
 			case RT_AUTO_UPDATE:
 			{
 				//! Обрабатываем только первый вызов автообновления
 				if (!m_UpdateList.length())
 				{
-					ParseXML(result, m_UpdateList);
+					QList<CBackupInfo> backupsList;
+					QList<CChangelogInfo> changelogList;
+					ParseXML(result, m_UpdateList, backupsList, changelogList);
 
 					int updatesSize = m_UpdateList.size();
 

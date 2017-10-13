@@ -20,14 +20,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         orionlauncherwindow.cpp \
     serverlistitem.cpp \
-    proxylistitem.cpp
+    proxylistitem.cpp \
+    changelogform.cpp
 
 HEADERS  += orionlauncherwindow.h \
     serverlistitem.h \
     proxylistitem.h \
-    qzipreader_p.h
+    qzipreader_p.h \
+    changelogform.h
 
-FORMS    += orionlauncherwindow.ui
+FORMS    += orionlauncherwindow.ui \
+    changelogform.ui
 
 OTHER_FILES += orionlauncher.rc
 

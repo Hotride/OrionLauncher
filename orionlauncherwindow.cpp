@@ -33,8 +33,10 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 	g_OrionLauncherWindow = this;
 
 	qRegisterMetaType<QList<CUpdateInfo>>("QList<CUpdateInfo>");
+	qRegisterMetaType<QList<CBackupInfo>>("QList<CBackupInfo>");
 
 	connect(this, SIGNAL(signal_UpdatesListReceived(QList<CUpdateInfo>)), this, SLOT(slot_UpdatesListReceived(QList<CUpdateInfo>)));
+	connect(this, SIGNAL(signal_BackupsListReceived(QList<CBackupInfo>)), this, SLOT(slot_BackupsListReceived(QList<CBackupInfo>)));
 	connect(this, SIGNAL(signal_FileReceived(QByteArray, QString)), this, SLOT(slot_FileReceived(QByteArray, QString)));
 	connect(this, SIGNAL(signal_FileReceivedNotification(QString)), this, SLOT(slot_FileReceivedNotification(QString)));
 
@@ -68,12 +70,21 @@ OrionLauncherWindow::~OrionLauncherWindow()
 	g_OrionLauncherWindow = nullptr;
 
 	delete ui;
+
+	if (m_ChangelogForm != nullptr)
+	{
+		delete m_ChangelogForm;
+		m_ChangelogForm = nullptr;
+	}
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::closeEvent(QCloseEvent *event)
 {
 	SaveServerList();
 	SaveProxyList();
+
+	if (m_ChangelogForm != nullptr)
+		m_ChangelogForm->close();
 
 	event->accept();
 }
@@ -1050,6 +1061,14 @@ void OrionLauncherWindow::slot_UpdatesListReceived(QList<CUpdateInfo> list)
 	ui->pb_UpdateProgress->setValue(100);
 }
 //----------------------------------------------------------------------------------
+void OrionLauncherWindow::slot_BackupsListReceived(QList<CBackupInfo> list)
+{
+	ui->lw_Backups->clear();
+
+	for (const CBackupInfo &info : list)
+		ui->lw_Backups->addItem(new CBackupInfoListWidgetItem(info));
+}
+//----------------------------------------------------------------------------------
 void OrionLauncherWindow::slot_FileReceived(QByteArray array, QString name)
 {
 	Q_UNUSED(array);
@@ -1099,6 +1118,7 @@ void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
 	ui->pb_UpdateProgress->setValue(0);
 
 	ui->lw_AvailableUpdates->clear();
+	ui->lw_Backups->clear();
 
 	QtConcurrent::run(&CUpdateManager<OrionLauncherWindow>::CheckUpdates, QStringList() << "www.orion-client.online" << "/Downloads/" << "OrionUpdate.html", this);
 }
@@ -1176,5 +1196,28 @@ void OrionLauncherWindow::on_pb_ConfigureClientVersion_clicked()
 
 	if (QFile::exists(path))
 		RunProgram(path, directoryPath);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_RestoreSelectedVersion_clicked()
+{
+	CBackupInfoListWidgetItem *item = (CBackupInfoListWidgetItem*)ui->lw_Backups->currentItem();
+
+	if (item == nullptr)
+		return;
+
+	QtConcurrent::run(&CUpdateManager<OrionLauncherWindow>::DownloadFile, QStringList() << "www.orion-client.online" << "/Downloads/" << item->m_Backup.ZipFileName, this, QString(ui->cb_OrionPath->currentText() + "/" + item->m_Backup.ZipFileName), true);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_pb_ShowChangelog_clicked()
+{
+	if (m_ChangelogForm == nullptr)
+		m_ChangelogForm = new ChangelogForm(nullptr);
+
+	if (m_ChangelogForm->isVisible())
+		m_ChangelogForm->activateWindow();
+	else
+		m_ChangelogForm->show();
+
+	QtConcurrent::run(&CUpdateManager<ChangelogForm>::GetChangelog, QStringList() << "www.orion-client.online" << "/Downloads/" << "OrionChangelog" + ui->cb_ChangelogLangiage->currentText() + ".html", m_ChangelogForm);
 }
 //----------------------------------------------------------------------------------

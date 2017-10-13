@@ -14,6 +14,7 @@
 #include <QCloseEvent>
 #include <QKeyEvent>
 #include "UpdateManager/updatemanager.hpp"
+#include "changelogform.h"
 //----------------------------------------------------------------------------------
 namespace Ui
 {
@@ -91,11 +92,18 @@ private slots:
 	void on_pb_ConfigureClientVersion_clicked();
 
 	void slot_UpdatesListReceived(QList<CUpdateInfo> list);
+	void slot_BackupsListReceived(QList<CBackupInfo> list);
 	void slot_FileReceived(QByteArray array, QString name);
 	void slot_FileReceivedNotification(QString name);
 
+	void on_pb_RestoreSelectedVersion_clicked();
+
+	void on_pb_ShowChangelog_clicked();
+
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
+	void signal_BackupsListReceived(QList<CBackupInfo>);
+	void signal_ChangelogReceived(QList<CChangelogInfo>);
 	void signal_FileReceived(QByteArray, QString);
 	void signal_FileReceivedNotification(QString);
 	void signal_AutoUpdateProgress(int);
@@ -109,6 +117,8 @@ private:
 	int m_FilesToUpdateCount{ 0 };
 
 	bool m_LauncherFoundInUpdates{ false };
+
+	ChangelogForm *m_ChangelogForm{ nullptr };
 
 	void UpdateServerFields(const int &index);
 

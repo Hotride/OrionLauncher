@@ -797,6 +797,75 @@
          <number>0</number>
         </property>
        </widget>
+       <widget class="QLabel" name="label_17">
+        <property name="geometry">
+         <rect>
+          <x>420</x>
+          <y>10</y>
+          <width>101</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Backup versions:</string>
+        </property>
+       </widget>
+       <widget class="QListWidget" name="lw_Backups">
+        <property name="geometry">
+         <rect>
+          <x>345</x>
+          <y>30</y>
+          <width>251</width>
+          <height>231</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pb_RestoreSelectedVersion">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>270</y>
+          <width>171</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Restore selected version</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pb_ShowChangelog">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>300</y>
+          <width>131</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Show changelog</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="cb_ChangelogLangiage">
+        <property name="geometry">
+         <rect>
+          <x>520</x>
+          <y>302</y>
+          <width>41</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>EN</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RU</string>
+         </property>
+        </item>
+       </widget>
       </widget>
       <widget class="QWidget" name="tb_OAFeatures">
        <attribute name="title">
