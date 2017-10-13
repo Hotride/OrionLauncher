@@ -121,7 +121,7 @@ private:
 	 * @param xml Данные
 	 * @param updateList Сформированный список обновлений
 	 */
-	void ParseXML(const QString &xml, QList<CUpdateInfo> &updateList, QList<CBackupInfo> &backupsList, QList<CChangelogInfo> &changelogList)
+	void ParseXML(const QString &xml, QList<CUpdateInfo> &updateList, QList<CBackupInfo> &backupsList)
 	{
 		//qDebug() << "ParseXML (type:" << m_Type << "):\n" << xml;
 
@@ -134,11 +134,6 @@ private:
 #define ReadMetaValueB(var, name) \
 	if (attributes.hasAttribute(name)) \
 		backup.var = attributes.value(name).toString()
-
-//! Макрос для считывания XML данных в поля структуры CChangelogInfo
-#define ReadMetaValueC(var, name) \
-	if (attributes.hasAttribute(name)) \
-		changelog.var = attributes.value(name).toString()
 
 		QXmlStreamReader reader(xml);
 
@@ -192,17 +187,6 @@ private:
 						{
 							ReadMetaValueB(ZipFileName, "filename");
 							backupsList.push_back(backup);
-						}
-						else
-						{
-							CChangelogInfo changelog;
-							ReadMetaValueC(Name, "changelog");
-
-							if (changelog.Name.length())
-							{
-								ReadMetaValueC(Description, "description");
-								changelogList.push_back(changelog);
-							}
 						}
 					}
 				}
@@ -304,7 +288,7 @@ public:
 		else
 		{
 			//! Защита от зависания, уведомим ресивера о окончании процедуры
-			emit receiver->signal_ChangelogReceived(QList<CChangelogInfo>());
+			emit receiver->signal_ChangelogReceived("");
 		}
 	}
 
@@ -389,9 +373,8 @@ public:
 			{
 				QList<CUpdateInfo> updateList;
 				QList<CBackupInfo> backupsList;
-				QList<CChangelogInfo> changelogList;
 
-				ParseXML(result, updateList, backupsList, changelogList);
+				ParseXML(result, updateList, backupsList);
 
 				emit m_Receiver->signal_BackupsListReceived(backupsList);
 				emit m_Receiver->signal_UpdatesListReceived(updateList);
@@ -411,13 +394,7 @@ public:
 			}
 			case RT_GET_CHANGELOG:
 			{
-				QList<CUpdateInfo> updateList;
-				QList<CBackupInfo> backupsList;
-				QList<CChangelogInfo> changelogList;
-
-				ParseXML(result, updateList, backupsList, changelogList);
-
-				emit m_Receiver->signal_ChangelogReceived(changelogList);
+				emit m_Receiver->signal_ChangelogReceived( QString::fromLocal8Bit(result) );
 
 				break;
 			}
@@ -427,8 +404,7 @@ public:
 				if (!m_UpdateList.length())
 				{
 					QList<CBackupInfo> backupsList;
-					QList<CChangelogInfo> changelogList;
-					ParseXML(result, m_UpdateList, backupsList, changelogList);
+					ParseXML(result, m_UpdateList, backupsList);
 
 					int updatesSize = m_UpdateList.size();
 

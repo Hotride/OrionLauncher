@@ -122,6 +122,7 @@ void OrionLauncherWindow::UpdateServerFields(const int &index)
 		ui->le_ServerAddress->setText(item->GetAddress());
 		ui->le_ServerAccount->setText(item->GetAccount());
 		ui->le_ServerPassword->setText(item->GetPassword());
+		ui->le_ServeCharacter->setText(item->GetCharacter());
 		ui->cb_ServerEncryptPassword->setChecked(item->GetEncrypted());
 		ui->le_CommandLine->setText(item->GetCommand());
 
@@ -172,7 +173,7 @@ void OrionLauncherWindow::on_pb_ServerAdd_clicked()
 		}
 	}
 
-	CServerListItem *item = new CServerListItem(ui->le_ServerName->text(), ui->le_ServerAddress->text(), ui->le_ServerAccount->text(), ui->le_ServerPassword->text(), ui->cb_ServerEncryptPassword->isChecked());
+	CServerListItem *item = new CServerListItem(ui->le_ServerName->text(), ui->le_ServerAddress->text(), ui->le_ServerAccount->text(), ui->le_ServerPassword->text(), ui->le_ServeCharacter->text(), ui->cb_ServerEncryptPassword->isChecked());
 	item->SetUseProxy(ui->cb_ServerUseProxy->isChecked());
 	item->SetProxy(ui->cb_ServerProxy->currentText());
 
@@ -222,6 +223,7 @@ void OrionLauncherWindow::on_pb_ServerSave_clicked()
 	selected->setText(ui->le_ServerName->text());
 	selected->SetAddress(ui->le_ServerAddress->text());
 	selected->SetAccount(ui->le_ServerAccount->text());
+	selected->SetCharacter(ui->le_ServeCharacter->text());
 	selected->SetPassword(ui->le_ServerPassword->text());
 	selected->SetEncrypted(ui->cb_ServerEncryptPassword->isChecked());
 	selected->SetUseProxy(ui->cb_ServerUseProxy->isChecked());
@@ -464,6 +466,7 @@ void OrionLauncherWindow::SaveServerList()
 		writter.writeAttribute("closeafterlaunch", BoolToText(ui->cb_LaunchCloseAfterLaunch->isChecked()));
 		writter.writeAttribute("lastserver", QString::number(ui->lw_ServerList->currentRow()));
 		writter.writeAttribute("checkupdates", BoolToText(ui->cb_CheckUpdates->isChecked()));
+		writter.writeAttribute("changeloglanguage", ui->cb_ChangelogLanguage->currentText());
 
 		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
 		{
@@ -487,6 +490,7 @@ void OrionLauncherWindow::SaveServerList()
 				writter.writeAttribute("address", item->GetAddress());
 				writter.writeAttribute("account", item->GetAccount());
 				writter.writeAttribute("password", item->GetPassword());
+				writter.writeAttribute("character", item->GetCharacter());
 				writter.writeAttribute("command", item->GetCommand());
 				writter.writeAttribute("encrypted", BoolToText(item->GetEncrypted()));
 				writter.writeAttribute("useproxy", BoolToText(item->GetUseProxy()));
@@ -643,6 +647,9 @@ void OrionLauncherWindow::LoadServerList()
 
 					if (attributes.hasAttribute("checkupdates"))
 						ui->cb_CheckUpdates->setChecked(RawStringToBool(attributes.value("checkupdates").toString()));
+
+					if (attributes.hasAttribute("changeloglanguage"))
+						ui->cb_ChangelogLanguage->setCurrentText(attributes.value("changeloglanguage").toString());
 				}
 				else if (reader.name() == "clientpath")
 				{
@@ -681,6 +688,9 @@ void OrionLauncherWindow::LoadServerList()
 
 						if (attributes.hasAttribute("password"))
 							item->SetPassword(attributes.value("password").toString());
+
+						if (attributes.hasAttribute("character"))
+							item->SetCharacter(attributes.value("character").toString());
 
 						if (attributes.hasAttribute("command"))
 							item->SetCommand(attributes.value("command").toString());
@@ -852,6 +862,13 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	QString account = serverItem->GetAccount();
 	QString password = serverItem->GetPassword();
 	command += " -account:" + EncodeArgumentString(account.toStdString().c_str(), account.length()) + "," + EncodeArgumentString(password.toStdString().c_str(), password.length());
+
+	QString character = serverItem->GetCharacter();
+
+	if (character.length())
+	{
+		command += "autologinname:" + EncodeArgumentString(character.toStdString().c_str(), character.length());
+	}
 
 	if (serverItem->GetUseProxy())
 	{
@@ -1073,6 +1090,9 @@ void OrionLauncherWindow::slot_UpdatesListReceived(QList<CUpdateInfo> list)
 
 	ui->pb_CheckUpdates->setEnabled(true);
 	ui->pb_ApplyUpdates->setEnabled(true);
+	ui->lw_Backups->setEnabled(true);
+	ui->pb_RestoreSelectedVersion->setEnabled(true);
+	ui->pb_ShowChangelog->setEnabled(true);
 	ui->pb_UpdateProgress->setValue(100);
 }
 //----------------------------------------------------------------------------------
@@ -1102,6 +1122,9 @@ void OrionLauncherWindow::slot_FileReceivedNotification(QString name)
 	{
 		ui->pb_CheckUpdates->setEnabled(true);
 		ui->pb_ApplyUpdates->setEnabled(true);
+		ui->lw_Backups->setEnabled(true);
+		ui->pb_RestoreSelectedVersion->setEnabled(true);
+		ui->pb_ShowChangelog->setEnabled(true);
 		ui->pb_UpdateProgress->setValue(100);
 		m_FilesToUpdateCount = 0;
 
@@ -1130,6 +1153,9 @@ void OrionLauncherWindow::on_pb_CheckUpdates_clicked()
 
 	ui->pb_CheckUpdates->setEnabled(false);
 	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->lw_Backups->setEnabled(false);
+	ui->pb_RestoreSelectedVersion->setEnabled(false);
+	ui->pb_ShowChangelog->setEnabled(false);
 	ui->pb_UpdateProgress->setValue(0);
 
 	ui->lw_AvailableUpdates->clear();
@@ -1156,6 +1182,9 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 
 	ui->pb_CheckUpdates->setEnabled(false);
 	ui->pb_ApplyUpdates->setEnabled(false);
+	ui->lw_Backups->setEnabled(false);
+	ui->pb_RestoreSelectedVersion->setEnabled(false);
+	ui->pb_ShowChangelog->setEnabled(false);
 
 	QString directoryPath = ui->cb_OrionPath->currentText();
 	m_LauncherFoundInUpdates = false;
@@ -1200,6 +1229,9 @@ void OrionLauncherWindow::on_pb_ApplyUpdates_clicked()
 	{
 		ui->pb_CheckUpdates->setEnabled(true);
 		ui->pb_ApplyUpdates->setEnabled(true);
+		ui->lw_Backups->setEnabled(true);
+		ui->pb_RestoreSelectedVersion->setEnabled(true);
+		ui->pb_ShowChangelog->setEnabled(true);
 		ui->pb_UpdateProgress->setValue(100);
 	}
 }
@@ -1220,7 +1252,11 @@ void OrionLauncherWindow::on_pb_RestoreSelectedVersion_clicked()
 	if (item == nullptr)
 		return;
 
+	ui->pb_UpdateProgress->setValue(0);
+
 	QtConcurrent::run(&CUpdateManager<OrionLauncherWindow>::DownloadFile, QStringList() << "www.orion-client.online" << "/Downloads/" << item->m_Backup.ZipFileName, this, QString(ui->cb_OrionPath->currentText() + "/" + item->m_Backup.ZipFileName), true);
+
+	QMessageBox::information(this, "Waiting for data...", "Download the backup/test version.\nClick OK and wait until the progress bar is 100%\nThis process can take a long time.");
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::on_pb_ShowChangelog_clicked()
@@ -1233,6 +1269,14 @@ void OrionLauncherWindow::on_pb_ShowChangelog_clicked()
 	else
 		m_ChangelogForm->show();
 
-	QtConcurrent::run(&CUpdateManager<ChangelogForm>::GetChangelog, QStringList() << "www.orion-client.online" << "/Downloads/" << "OrionChangelog" + ui->cb_ChangelogLangiage->currentText() + ".html", m_ChangelogForm);
+	emit m_ChangelogForm->signal_ChangelogReceived("Loading...");
+
+	QtConcurrent::run(&CUpdateManager<ChangelogForm>::GetChangelog, QStringList() << "www.orion-client.online" << "/Downloads/" << ("OrionChangelog" + ui->cb_ChangelogLanguage->currentText() + ".html"), m_ChangelogForm);
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_lw_Backups_doubleClicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+	on_pb_RestoreSelectedVersion_clicked();
 }
 //----------------------------------------------------------------------------------

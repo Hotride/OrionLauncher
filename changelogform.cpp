@@ -9,15 +9,15 @@
 //----------------------------------------------------------------------------------
 #include "changelogform.h"
 #include "ui_changelogform.h"
+#include <QDesktopServices>
 //----------------------------------------------------------------------------------
 ChangelogForm::ChangelogForm(QWidget *parent)
 : QMainWindow(parent), ui(new Ui::ChangelogForm)
 {
 	ui->setupUi(this);
 
-	qRegisterMetaType<QList<CChangelogInfo>>("QList<CChangelogInfo>");
-
-	connect(this, SIGNAL(signal_ChangelogReceived(QList<CChangelogInfo>)), this, SLOT(slot_ChangelogReceived(QList<CChangelogInfo>)));
+	connect(this, SIGNAL(signal_ChangelogReceived(QString)), this, SLOT(slot_ChangelogReceived(QString)));
+	connect(ui->tb_Log, SIGNAL(anchorClicked(QUrl)), this, SLOT(slot_StartLink(QUrl)));
 }
 //----------------------------------------------------------------------------------
 ChangelogForm::~ChangelogForm()
@@ -25,9 +25,13 @@ ChangelogForm::~ChangelogForm()
 	delete ui;
 }
 //----------------------------------------------------------------------------------
-void ChangelogForm::slot_ChangelogReceived(QList<CChangelogInfo> list)
+void ChangelogForm::slot_ChangelogReceived(QString str)
 {
-	ui->pte_Log->clear();
-	ui->pte_Log->setPlainText("Changelog Received!!!");
+	ui->tb_Log->setHtml(str);
+}
+//----------------------------------------------------------------------------------
+void ChangelogForm::slot_StartLink(QUrl url)
+{
+	QDesktopServices::openUrl(url);
 }
 //----------------------------------------------------------------------------------

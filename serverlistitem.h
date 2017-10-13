@@ -18,6 +18,7 @@ private:
 	QString m_Address{ "" };
 	QString m_Account{ "" };
 	QString m_Password{ "" };
+	QString m_Character{ "" };
 	QString m_Command{ "" };
 	bool m_Encrypted{ false };
 	bool m_UseProxy{ false };
@@ -31,7 +32,7 @@ private:
 
 public:
 	CServerListItem(const QString &name);
-	CServerListItem(const QString &name, const QString &address, const QString &account, const QString &password, const bool &encrypted);
+	CServerListItem(const QString &name, const QString &address, const QString &account, const QString &password, const QString &character, const bool &encrypted);
 	virtual ~CServerListItem() {}
 
 	QString GetAddress() const { return m_Address; }
@@ -42,6 +43,9 @@ public:
 
 	QString GetPassword() const { return m_Password; }
 	void SetPassword(const QString &password) { m_Password = password; }
+
+	QString GetCharacter() const { return m_Character; }
+	void SetCharacter(const QString &character) { m_Character = character; }
 
 	QString GetCommand() const { return m_Command; }
 	void SetCommand(const QString &command) { m_Command = command; }

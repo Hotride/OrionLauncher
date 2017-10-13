@@ -1,5 +1,8 @@
 IDI_ICON1               ICON    DISCARDABLE     "OrionLauncher.ico"
 
+#define VER_FILEVERSION			1,1,0,0
+#define VER_FILEVERSION_STR		"0,1,0,0\0"
+
 # if defined(UNDER_CE)
 #  include <winbase.h>
 # else
@@ -7,8 +10,8 @@ IDI_ICON1               ICON    DISCARDABLE     "OrionLauncher.ico"
 # endif
 
 VS_VERSION_INFO VERSIONINFO
-	FILEVERSION 1,0,0,17
-	PRODUCTVERSION 1,0,0,17
+    FILEVERSION VER_FILEVERSION
+	PRODUCTVERSION VER_FILEVERSION
 	FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
 	FILEFLAGS VS_FF_DEBUG
@@ -25,11 +28,11 @@ VS_VERSION_INFO VERSIONINFO
 			BEGIN
 				VALUE "CompanyName", "\0"
 				VALUE "FileDescription", "\0"
-				VALUE "FileVersion", "1.0.0.17\0"
+				VALUE "FileVersion", VER_FILEVERSION_STR
 				VALUE "LegalCopyright", "\0"
 				VALUE "OriginalFilename", "OrionLauncher.exe\0"
 				VALUE "ProductName", "OrionLauncher\0"
-				VALUE "ProductVersion", "1.0.0.17\0"
+				VALUE "ProductVersion", VER_FILEVERSION_STR
 			END
 		END
 		BLOCK "VarFileInfo"

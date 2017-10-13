@@ -100,10 +100,12 @@ private slots:
 
 	void on_pb_ShowChangelog_clicked();
 
+	void on_lw_Backups_doubleClicked(const QModelIndex &index);
+
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
 	void signal_BackupsListReceived(QList<CBackupInfo>);
-	void signal_ChangelogReceived(QList<CChangelogInfo>);
+	void signal_ChangelogReceived(QString);
 	void signal_FileReceived(QByteArray, QString);
 	void signal_FileReceivedNotification(QString);
 	void signal_AutoUpdateProgress(int);

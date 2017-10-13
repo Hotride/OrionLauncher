@@ -11,6 +11,7 @@
 #define CHANGELOGFORM_H
 //----------------------------------------------------------------------------------
 #include <QMainWindow>
+#include <QUrl>
 #include "UpdateManager/updatemanager.hpp"
 //----------------------------------------------------------------------------------
 namespace Ui
@@ -27,12 +28,13 @@ public:
 	~ChangelogForm();
 
 private slots:
-	void slot_ChangelogReceived(QList<CChangelogInfo> list);
+	void slot_ChangelogReceived(QString str);
+	void slot_StartLink(QUrl url);
 
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
 	void signal_BackupsListReceived(QList<CBackupInfo>);
-	void signal_ChangelogReceived(QList<CChangelogInfo>);
+	void signal_ChangelogReceived(QString);
 	void signal_FileReceived(QByteArray, QString);
 	void signal_FileReceivedNotification(QString);
 	void signal_AutoUpdateProgress(int);
