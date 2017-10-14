@@ -1,7 +1,7 @@
 IDI_ICON1               ICON    DISCARDABLE     "OrionLauncher.ico"
 
-#define VER_FILEVERSION			1,1,0,1
-#define VER_FILEVERSION_STR		"0,1,0,1\0"
+#define VER_FILEVERSION			1,1,1,0
+#define VER_FILEVERSION_STR		"1,1,1,0\0"
 
 # if defined(UNDER_CE)
 #  include <winbase.h>
