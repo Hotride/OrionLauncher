@@ -63,6 +63,12 @@
           <height>331</height>
          </rect>
         </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDrop</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::MoveAction</enum>
+        </property>
        </widget>
        <widget class="QTabWidget" name="tw_Server">
         <property name="geometry">
@@ -558,6 +564,12 @@
           <width>331</width>
           <height>361</height>
          </rect>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDrop</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::MoveAction</enum>
         </property>
        </widget>
        <widget class="QLabel" name="label_7">
