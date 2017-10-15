@@ -39,6 +39,7 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 	connect(this, SIGNAL(signal_BackupsListReceived(QList<CBackupInfo>)), this, SLOT(slot_BackupsListReceived(QList<CBackupInfo>)));
 	connect(this, SIGNAL(signal_FileReceived(QByteArray, QString)), this, SLOT(slot_FileReceived(QByteArray, QString)));
 	connect(this, SIGNAL(signal_FileReceivedNotification(QString)), this, SLOT(slot_FileReceivedNotification(QString)));
+	connect(&m_UpdatesTimer, SIGNAL(timeout()), this, SLOT(slot_OnUpdatesTimer()));
 
 	setFixedSize(size());
 
@@ -63,6 +64,8 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 		on_tb_SetOrionPath_clicked();
 
 	on_cb_OrionPath_currentIndexChanged(ui->cb_OrionPath->currentIndex());
+
+	m_UpdatesTimer.start(15 * 60 * 1000);
 }
 //----------------------------------------------------------------------------------
 OrionLauncherWindow::~OrionLauncherWindow()
@@ -76,6 +79,14 @@ OrionLauncherWindow::~OrionLauncherWindow()
 		delete m_ChangelogForm;
 		m_ChangelogForm = nullptr;
 	}
+
+	m_UpdatesTimer.stop();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::slot_OnUpdatesTimer()
+{
+	if (ui->cb_CheckUpdates->isChecked())
+		on_pb_CheckUpdates_clicked();
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::closeEvent(QCloseEvent *event)
@@ -467,6 +478,7 @@ void OrionLauncherWindow::SaveServerList()
 		writter.writeAttribute("lastserver", QString::number(ui->lw_ServerList->currentRow()));
 		writter.writeAttribute("checkupdates", BoolToText(ui->cb_CheckUpdates->isChecked()));
 		writter.writeAttribute("changeloglanguage", ui->cb_ChangelogLanguage->currentText());
+		writter.writeAttribute("noclientwarnings", BoolToText(ui->cb_NoClientWarnings->isChecked()));
 
 		for (int i = 0; i < ui->cb_OrionPath->count(); i++)
 		{
@@ -650,6 +662,9 @@ void OrionLauncherWindow::LoadServerList()
 
 					if (attributes.hasAttribute("changeloglanguage"))
 						ui->cb_ChangelogLanguage->setCurrentText(attributes.value("changeloglanguage").toString());
+
+					if (attributes.hasAttribute("noclientwarnings"))
+						ui->cb_NoClientWarnings->setChecked(RawStringToBool(attributes.value("noclientwarnings").toString()));
 				}
 				else if (reader.name() == "clientpath")
 				{
@@ -866,9 +881,10 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	QString character = serverItem->GetCharacter();
 
 	if (character.length())
-	{
-		command += "autologinname:" + EncodeArgumentString(character.toStdString().c_str(), character.length());
-	}
+		command += "-autologinname:" + EncodeArgumentString(character.toStdString().c_str(), character.length());
+
+	if (ui->cb_NoClientWarnings->isChecked())
+		command += "-nowarnings";
 
 	if (serverItem->GetUseProxy())
 	{

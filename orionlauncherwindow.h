@@ -15,6 +15,7 @@
 #include <QKeyEvent>
 #include "UpdateManager/updatemanager.hpp"
 #include "changelogform.h"
+#include <QTimer>
 //----------------------------------------------------------------------------------
 namespace Ui
 {
@@ -102,6 +103,8 @@ private slots:
 
 	void on_lw_Backups_doubleClicked(const QModelIndex &index);
 
+	void slot_OnUpdatesTimer();
+
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
 	void signal_BackupsListReceived(QList<CBackupInfo>);
@@ -142,6 +145,8 @@ private:
 	void RunProgram(const QString &exePath, const QString &directory);
 
 	void UpdateOAFecturesCode();
+
+	QTimer m_UpdatesTimer;
 };
 //----------------------------------------------------------------------------------
 extern OrionLauncherWindow *g_OrionLauncherWindow;
