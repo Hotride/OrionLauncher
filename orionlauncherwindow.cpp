@@ -881,7 +881,7 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 	QString character = serverItem->GetCharacter();
 
 	if (character.length())
-		command += "-autologinname:" + EncodeArgumentString(character.toStdString().c_str(), character.length());
+		command += " -autologinname:" + EncodeArgumentString(character.toStdString().c_str(), character.length());
 
 	if (ui->cb_NoClientWarnings->isChecked())
 		command += "-nowarnings";

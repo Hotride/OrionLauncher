@@ -505,6 +505,9 @@
         <property name="editable">
          <bool>false</bool>
         </property>
+        <property name="maxVisibleItems">
+         <number>20</number>
+        </property>
        </widget>
        <widget class="QCheckBox" name="cb_CheckUpdates">
         <property name="geometry">
