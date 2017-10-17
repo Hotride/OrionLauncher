@@ -2,7 +2,7 @@
 
 ***
 
-[Закладка Launcher:Server](https://github.com/Hotride/OrionUO/wiki/Закладка-Launcher:Server)
+[Закладка Launcher:Accounts](https://github.com/Hotride/OrionUO/wiki/Закладка-Launcher:Accounts)
 
 [Закладка Launcher:Proxy](https://github.com/Hotride/OrionUO/wiki/Закладка-Launcher:Proxy)
 
