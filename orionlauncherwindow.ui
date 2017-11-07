@@ -946,7 +946,7 @@
        <widget class="QLabel" name="label_14">
         <property name="geometry">
          <rect>
-          <x>40</x>
+          <x>10</x>
           <y>10</y>
           <width>101</width>
           <height>16</height>
@@ -961,7 +961,7 @@
          <rect>
           <x>10</x>
           <y>30</y>
-          <width>191</width>
+          <width>181</width>
           <height>361</height>
          </rect>
         </property>
@@ -1109,11 +1109,67 @@
           <enum>Checked</enum>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Sound echo</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Animation echo</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Effect echo</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Map echo</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Speech filter</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Text replace</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Reconnector</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
        </widget>
        <widget class="QLabel" name="label_15">
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>200</x>
           <y>10</y>
           <width>131</width>
           <height>16</height>
@@ -1126,9 +1182,9 @@
        <widget class="QListWidget" name="lw_OAFeaturesScripts">
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>200</x>
           <y>30</y>
-          <width>181</width>
+          <width>191</width>
           <height>361</height>
          </rect>
         </property>
@@ -1343,6 +1399,62 @@
         <item>
          <property name="text">
           <string>Removed objects position</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Extended gumps</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Objects property</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Character profile</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Prompts</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Statusbars control</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Log out</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Timers</string>
          </property>
          <property name="checkState">
           <enum>Checked</enum>

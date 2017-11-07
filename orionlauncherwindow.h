@@ -105,6 +105,8 @@ private slots:
 
 	void slot_OnUpdatesTimer();
 
+	void slot_OnCheckClientCuoTimer();
+
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
 	void signal_BackupsListReceived(QList<CBackupInfo>);
@@ -147,6 +149,8 @@ private:
 	void UpdateOAFecturesCode();
 
 	QTimer m_UpdatesTimer;
+
+	QTimer m_CheckClientCuoTimer;
 };
 //----------------------------------------------------------------------------------
 extern OrionLauncherWindow *g_OrionLauncherWindow;

@@ -40,6 +40,7 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 	connect(this, SIGNAL(signal_FileReceived(QByteArray, QString)), this, SLOT(slot_FileReceived(QByteArray, QString)));
 	connect(this, SIGNAL(signal_FileReceivedNotification(QString)), this, SLOT(slot_FileReceivedNotification(QString)));
 	connect(&m_UpdatesTimer, SIGNAL(timeout()), this, SLOT(slot_OnUpdatesTimer()));
+	connect(&m_CheckClientCuoTimer, SIGNAL(timeout()), this, SLOT(slot_OnCheckClientCuoTimer()));
 
 	setFixedSize(size());
 
@@ -66,6 +67,7 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 	on_cb_OrionPath_currentIndexChanged(ui->cb_OrionPath->currentIndex());
 
 	m_UpdatesTimer.start(15 * 60 * 1000);
+	m_CheckClientCuoTimer.start(1000);
 }
 //----------------------------------------------------------------------------------
 OrionLauncherWindow::~OrionLauncherWindow()
@@ -87,6 +89,14 @@ void OrionLauncherWindow::slot_OnUpdatesTimer()
 {
 	if (ui->cb_CheckUpdates->isChecked())
 		on_pb_CheckUpdates_clicked();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::slot_OnCheckClientCuoTimer()
+{
+	if (!QFile::exists(ui->cb_OrionPath->currentText() + "/Client.cuo"))
+		ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0); font: 10pt \"MS Shell Dlg 2\";");
+	else
+		ui->pb_ConfigureClientVersion->setStyleSheet("font: 10pt \"MS Shell Dlg 2\";");
 }
 //----------------------------------------------------------------------------------
 void OrionLauncherWindow::closeEvent(QCloseEvent *event)
@@ -832,8 +842,6 @@ void OrionLauncherWindow::on_pb_Launch_clicked()
 
 	if (!QFile::exists(ui->cb_OrionPath->currentText() + "/Client.cuo"))
 	{
-		ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0);");
-
 		QString configErrorText = "You miss file 'Client.cuo'!\nYou must create it with ConfigurationEditor.exe tool.";
 
 		if (QFile::exists(directoryPath + "/ConfigurationEditor.exe"))
@@ -1005,20 +1013,20 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 	quint64 featuresFlags = 0;
 	quint64 scriptGroupsFlags = 0;
 
-	for (int i = 0; i < ui->lw_OAFeaturesOptions->count(); i++)
+	for (quint64 i = 0; i < (quint64)ui->lw_OAFeaturesOptions->count(); i++)
 	{
 		QListWidgetItem *item = ui->lw_OAFeaturesOptions->item(i);
 
 		if (item != nullptr && item->checkState() == Qt::Checked)
-			featuresFlags |= 1 << i;
+			featuresFlags |= ((quint64)1 << i);
 	}
 
-	for (int i = 0; i < ui->lw_OAFeaturesScripts->count(); i++)
+	for (quint64 i = 0; i < (quint64)ui->lw_OAFeaturesScripts->count(); i++)
 	{
 		QListWidgetItem *item = ui->lw_OAFeaturesScripts->item(i);
 
 		if (item != nullptr && item->checkState() == Qt::Checked)
-			scriptGroupsFlags |= 1 << i;
+			scriptGroupsFlags |= ((quint64)1 << i);
 	}
 
 	QString code = "";
@@ -1026,8 +1034,8 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 	if (ui->rb_OAFeaturesSphere->isChecked())
 	{
 		code.sprintf("//data for sendpacket\nB0FC W015 W0A001 D0%08X D0%08X D0%08X D0%08X",
-					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
-					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+					 (uint)((featuresFlags >> 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags >> 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
 	}
 	else if (ui->rb_OAFeaturesRunUO->isChecked())
 	{
@@ -1043,8 +1051,8 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 							"m_Stream.Write((uint)0x%08X);\n"
 						"}\n"
 					"}",
-					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
-					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+					 (uint)((featuresFlags >> 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags >> 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
 	}
 	else if (ui->rb_OAFeaturesPOL->isChecked())
 	{
@@ -1054,8 +1062,8 @@ void OrionLauncherWindow::UpdateOAFecturesCode()
 						 "print(\"SendPacket error: \" + res.errortext );\n"
 					 "endif\n"
 					"endprogram",
-					 (uint)((featuresFlags << 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
-					 (uint)((scriptGroupsFlags << 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
+					 (uint)((featuresFlags >> 32) & 0xFFFFFFFF), (uint)(featuresFlags & 0xFFFFFFFF),
+					 (uint)((scriptGroupsFlags >> 32) & 0xFFFFFFFF), (uint)(scriptGroupsFlags & 0xFFFFFFFF));
 	}
 
 	ui->pte_OAFeaturesCode->setPlainText(code);
@@ -1070,12 +1078,7 @@ void OrionLauncherWindow::on_cb_OrionPath_currentIndexChanged(int index)
 		if (ui->cb_CheckUpdates->isChecked())
 			on_pb_CheckUpdates_clicked();
 
-		QString configFilePath = ui->cb_OrionPath->currentText() + "/Client.cuo";
-
-		if (!QFile::exists(configFilePath))
-			ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(255, 0, 0);");
-		else
-			ui->pb_ConfigureClientVersion->setStyleSheet("color: rgb(0, 0, 0);");
+		slot_OnCheckClientCuoTimer();
 	}
 }
 //----------------------------------------------------------------------------------
