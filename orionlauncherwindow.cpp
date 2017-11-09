@@ -51,6 +51,7 @@ OrionLauncherWindow::OrionLauncherWindow(QWidget *parent)
 	ui->tw_Server->setCurrentIndex(0);
 
 	UpdateOAFecturesCode();
+	UpdateOrionFecturesCode();
 
 	QString crc32 = "";
 	QString version = "";
@@ -1094,7 +1095,7 @@ void OrionLauncherWindow::slot_UpdatesListReceived(QList<CUpdateInfo> list)
 
 		bool wantUpdate = !CUpdateManager<OrionLauncherWindow>::GetFileInfo((info.UODir == "yes" ? directoryPath : qApp->applicationDirPath()) + "/" + info.Name, version, crc32);
 
-		if (info.Version.length() && info.Version != version)
+		if (info.Version.length() && CUpdateManager<OrionLauncherWindow>::TestVersions(version, info.Version))
 			wantUpdate = true;
 
 		if (info.Hash.length() && info.Hash != crc32)
@@ -1297,5 +1298,69 @@ void OrionLauncherWindow::on_lw_Backups_doubleClicked(const QModelIndex &index)
 {
 	Q_UNUSED(index);
 	on_pb_RestoreSelectedVersion_clicked();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_lw_OrionFeaturesOptions_clicked(const QModelIndex &index)
+{
+	Q_UNUSED(index);
+	UpdateOrionFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OrionFeaturesSphere_clicked()
+{
+	UpdateOrionFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OrionFeaturesRunUO_clicked()
+{
+	UpdateOrionFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::on_rb_OrionFeaturesPOL_clicked()
+{
+	UpdateOrionFecturesCode();
+}
+//----------------------------------------------------------------------------------
+void OrionLauncherWindow::UpdateOrionFecturesCode()
+{
+	uint featuresFlags = 0;
+
+	for (int i = 0; i < ui->lw_OrionFeaturesOptions->count(); i++)
+	{
+		QListWidgetItem *item = ui->lw_OrionFeaturesOptions->item(i);
+
+		if (item != nullptr && item->checkState() == Qt::Checked)
+			featuresFlags |= (1 << i);
+	}
+
+	QString code = "";
+
+	if (ui->rb_OrionFeaturesSphere->isChecked())
+	{
+		code.sprintf("//data for sendpacket\nB0FC W0009 W0032 D0%08X", featuresFlags);
+	}
+	else if (ui->rb_OrionFeaturesRunUO->isChecked())
+	{
+		code.sprintf("public sealed class OAFeatures : Packet\n"
+					"{\n"
+						"public OAFeatures() : base(0xFC)\n"
+						"{\n"
+							"EnsureCapacity(9);\n"
+							"m_Stream.Write((ushort)0x0032);\n"
+							"m_Stream.Write((uint)0x%08X);\n"
+						"}\n"
+					"}", featuresFlags);
+	}
+	else if (ui->rb_OrionFeaturesPOL->isChecked())
+	{
+		code.sprintf("program oafeatures_sendpacket(who)\n"
+					 "var res := SendPacket(who, \"FC00090032%08X\");\n"
+					 "if (!res)\n"
+						 "print(\"SendPacket error: \" + res.errortext );\n"
+					 "endif\n"
+					"endprogram", featuresFlags);
+	}
+
+	ui->pte_OrionFeaturesCode->setPlainText(code);
 }
 //----------------------------------------------------------------------------------

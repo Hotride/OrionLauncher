@@ -107,6 +107,14 @@ private slots:
 
 	void slot_OnCheckClientCuoTimer();
 
+	void on_lw_OrionFeaturesOptions_clicked(const QModelIndex &index);
+
+	void on_rb_OrionFeaturesSphere_clicked();
+
+	void on_rb_OrionFeaturesRunUO_clicked();
+
+	void on_rb_OrionFeaturesPOL_clicked();
+
 signals:
 	void signal_UpdatesListReceived(QList<CUpdateInfo>);
 	void signal_BackupsListReceived(QList<CBackupInfo>);
@@ -147,6 +155,8 @@ private:
 	void RunProgram(const QString &exePath, const QString &directory);
 
 	void UpdateOAFecturesCode();
+
+	void UpdateOrionFecturesCode();
 
 	QTimer m_UpdatesTimer;
 

@@ -166,7 +166,7 @@ private:
 
 							bool wantUpdate = !GetFileInfo(m_DirectoryToSave + "/" + info.Name, version, crc32);
 
-							if (info.Version.length() && info.Version != version)
+							if (info.Version.length() && TestVersions(version, info.Version))
 								wantUpdate = true;
 
 							if (info.Hash.length() && info.Hash != crc32)
@@ -217,6 +217,35 @@ public:
 	{
 	}
 
+	//----------------------------------------------------------------------------------
+	/**
+	 * @brief TestVersions Сверка версий
+	 * @param currentFileVersion Текущая версия файла
+	 * @param updateFileVersion Версия файла из обновления
+	 * @return true если необходимо обновить файл
+	 */
+	static bool TestVersions(const QString &currentFileVersion, const QString &updateFileVersion)
+	{
+		QStringList currentVersionList = currentFileVersion.split('.');
+		QStringList updateVersionList = updateFileVersion.split('.');
+		int count = currentVersionList.size();
+
+		if (count != updateVersionList.size())
+			return false;
+
+		for (int i = 0; i < count; i++)
+		{
+			int currentVersionInt = currentVersionList[i].toInt();
+			int updateVersionInt = updateVersionList[i].toInt();
+
+			if (updateVersionInt > currentVersionInt)
+				return true;
+			else if (updateVersionInt < currentVersionInt)
+				return false;
+		}
+
+		return false;
+	}
 	//----------------------------------------------------------------------------------
 	/**
 	 * @brief CheckUpdates Функция проверки обновлений

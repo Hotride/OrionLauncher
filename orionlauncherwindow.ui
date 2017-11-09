@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tw_Main">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tb_Server">
        <attribute name="title">
@@ -937,6 +937,177 @@
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tb_OrionFeatures">
+       <attribute name="title">
+        <string>Orion Features</string>
+       </attribute>
+       <widget class="QPlainTextEdit" name="pte_OrionFeaturesCode">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>100</y>
+          <width>351</width>
+          <height>291</height>
+         </rect>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QPlainTextEdit::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_19">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>101</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enabled options:</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="gb_OrionFeaturesEmulator">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>30</y>
+          <width>351</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Output code for emulator</string>
+        </property>
+        <widget class="QRadioButton" name="rb_OrionFeaturesSphere">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>30</y>
+           <width>71</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Sphere</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rb_OrionFeaturesRunUO">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>30</y>
+           <width>71</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>RunUO</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rb_OrionFeaturesPOL">
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>30</y>
+           <width>51</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>POL</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QListWidget" name="lw_OrionFeaturesOptions">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>271</width>
+          <height>361</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>Draw characters status in the world</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Changing trees to stumps</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Marking cave tiles</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>No vegetation</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>No fields animation</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Colored characters state</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Change fields to tiles</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Draw aura</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>No draw roofs</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
        </widget>
       </widget>
       <widget class="QWidget" name="tb_OAFeatures">
