@@ -231,7 +231,7 @@ public:
 		int count = currentVersionList.size();
 
 		if (count != updateVersionList.size())
-			return false;
+			return true;
 
 		for (int i = 0; i < count; i++)
 		{
