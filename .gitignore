@@ -1,6 +1,6 @@
 *.user
 *.o
 *.txt
-/release_bin
+/DEPLOY
 Makefile*
 !/WikiData/RU/*.txt
